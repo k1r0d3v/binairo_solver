@@ -1,5 +1,11 @@
 #!/bin/python3
 
+import subprocess
+import sys
+
+if (sys.version_info.major * 10 + sys.version_info.minor) < 35:
+        raise Exception("Python 3.5 or a more recent version is required.")
+
 class Table:
     def __init__(self, filename):
         with open(filename, 'r') as file:
@@ -38,9 +44,50 @@ class Table:
             str += self.__data[i]
         return str
 
+class Clasp:
+    @staticmethod
+    def resolve(cnf, max_solutions=0):
+        # Execute clasp with cnf string as input
+        cp = subprocess.run(
+            ['clasp', '--verbose=0', '{0}'.format(max_solutions)], 
+            input=cnf.encode('utf-8'), 
+            capture_output=True,
+            check=False
+        )
+
+        stderr = str(cp.stderr, encoding='utf-8')
+        stdout = str(cp.stdout, encoding='utf-8')
+
+        # Raise a exception if stderr is not empty
+        if len(stderr) != 0:
+            raise Exception(stderr)
+
+        # Parse the solutions
+        solutions = []
+        lines = stdout.split('\n')
+        for line in lines:
+            if line.startswith('v '):
+                solutions.append(line[2:].split(' ')[:-1])
+            elif line.startswith('s '):
+                break
+        
+        return solutions
+
+#
+# Main
+#
+
 t = Table('sample.txt')
 t.getCell(5, 0)
 t.setCell(1, 1, '*')
 
-print(t)
-print(t.data())
+#print(t)
+
+solutions = Clasp.resolve(
+    'p cnf 3 2\n'
+    '-1 -3 0\n'
+    '-2 -3 0\n',
+    max_solutions=0
+)
+
+print(solutions)
