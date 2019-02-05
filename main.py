@@ -7,15 +7,9 @@ if (sys.version_info.major * 10 + sys.version_info.minor) < 35:
         raise Exception("Python 3.5 or a more recent version is required.")
 
 class Table:
-    def __init__(self, filename):
-        with open(filename, 'r') as file:
-            self.__size = int(file.readline())
-            self.__data = []
-            for line in file:
-                line = line.replace('\n', '')
-                line = line.replace(' ', '')
-                for column in line:
-                    self.__data.append(column)
+    def __init__(self):
+        self.__size = 0
+        self.__date = None
 
     def size(self):
         return self.__size
@@ -57,34 +51,53 @@ class Table:
                 str += '\n'
             str += self.__data[i]
         return str
+    
+    @staticmethod
+    def from_text(size, text):
+        t = Table()
+        t.__size = size
+        t.__data = []
+
+        lines = text.split('\n')
+        for line in lines:
+            for column in line:
+                t.__data.append(column)
+        return t
+
+    @staticmethod
+    def from_file(filename):
+        
+        with open(filename, 'r') as file:
+            size = int(file.readline())
+            return Table.from_text(size, file.read())
+        raise Exception()
+
 
 class Clasp:
     @staticmethod
-    def _cnf_format(n, p):
+    def _cnf_format(variable_count, clauses):
         """ Description
         Format a list of prepositions to clasp format.
         Ex.
         p cnf 3 2
         -1 -3 0
         -2 -3 0
-
-        :param n: number of variables
-        :param p: list of prepositions
         """    
-        cnf = 'p cnf {0} {1}\n'.format(n, len(p))
+        cnf = 'p cnf {0} {1}\n'.format(variable_count, len(clauses))        
 
-        for i in p:
+        for i in clauses:
             for j in i:
                 cnf += '{} '.format(j)
             cnf += '0\n'
+
         return cnf.encode('utf-8')
 
     @staticmethod
-    def resolve(n, p, max_solutions=0):
+    def resolve(variable_count, clauses, max_solutions=0):
         # Execute clasp with cnf string as input
         cp = subprocess.run(
             ['clasp', '--verbose=0', '{0}'.format(max_solutions)], 
-            input=Clasp._cnf_format(n, p),
+            input=Clasp._cnf_format(variable_count, clauses),
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE
         )
@@ -97,53 +110,45 @@ class Clasp:
             raise Exception(stderr)
 
         # Parse the solutions
+        result = None
         solutions = []
         lines = stdout.split('\n')
         for line in lines:
             if line.startswith('v '):
                 solutions.append(list(map(int, line[2:].split(' ')[:-1])))
             elif line.startswith('s '):
+                result = line[2:]
                 break
         
-        return solutions
+        return solutions, result
 
 #
 # Main
 #
 
-t = Table('sample.txt')
-
+t = Table.from_file('sample.txt')
 print(t)
+print('')
 
-print('Rows test')
-
-print(t.getRow(0))
-print(t.getRow(1))
-print(t.getRow(2))
-print(t.getRow(3))
-print(t.getRow(4))
-print(t.getRow(5))
-
-print('Columns text')
-
-print(t.getColumn(0))
-print(t.getColumn(1))
-print(t.getColumn(2))
-print(t.getColumn(3))
-print(t.getColumn(4))
-print(t.getColumn(5))
-
-print('Clasp test')
-
-solutions = Clasp.resolve(
+solutions, result = Clasp.resolve(
     # Number of variables
-    3, 
+    4,
 
-    # Preposition list
     [
-        [-1, -3],
+        # CNF (1 and -2) or (-1 and 2 and -3) or (-2 and 3 and -4) or (-3 and 4)
+        [-1, -2, 4],
+        [1, 2, 3, 4],
+        [1, -3, -4],
         [-2, -3],
-    ]
+
+        # CNF -((1 and -2) or (-1 and 2 and -3) or (-2 and 3 and -4) or (-3 and 4))
+        [1, 2, -4],
+        [-1, -2, -3, -4],
+        [-1, 3, 4],
+        [2, 3],
+    ],
+    max_solutions=0
 )
 
 print(solutions)
+print(result)
