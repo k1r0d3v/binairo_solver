@@ -50,9 +50,9 @@ class Clasp:
         # Execute clasp with cnf string as input
         cp = subprocess.run(
             ['clasp', '--verbose=0', '{0}'.format(max_solutions)], 
-            input=cnf.encode('utf-8'), 
-            capture_output=True,
-            check=False
+            input=cnf.encode('utf-8'),
+            stdout=subprocess.PIPE, 
+            stderr=subprocess.PIPE
         )
 
         stderr = str(cp.stderr, encoding='utf-8')
@@ -81,7 +81,7 @@ t = Table('sample.txt')
 t.getCell(5, 0)
 t.setCell(1, 1, '*')
 
-#print(t)
+print(t)
 
 solutions = Clasp.resolve(
     'p cnf 3 2\n'
