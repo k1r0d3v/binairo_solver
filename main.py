@@ -25,16 +25,30 @@ class Table:
     
     def getCell(self, x, y):
         assert x < self.__size and y < self.__size, 'Index overflow'
-        return self.__data[x * self.__size + y]
+        return self.__data[y * self.__size + x]
 
     def setCell(self, x, y, value):
         assert x < self.__size and y < self.__size, 'Index overflow'
         assert len(value) == 1, 'Expected char value'
+        assert value == '.' or value == '0' or value == '1', 'Invalid value, accepted values are: ".", "0", "1"'
 
-        index = x * self.__size + y
+        index = y * self.__size + x
         old = self.__data[index]
         self.__data[index] = value
         return old
+
+    def getRow(self, y):
+        assert y < self.__size, 'Index overflow'
+        row = y * self.__size
+        return self.__data[row:row + self.__size]
+
+    def getColumn(self, x):
+        assert x < self.__size, 'Index overflow'
+
+        col = []
+        for i in range(0, self.__size):
+            col.append(self.getCell(x, i))
+        return col
 
     def __str__(self):
         str = ''
@@ -45,14 +59,16 @@ class Table:
         return str
 
 class Clasp:
+
+
     @staticmethod
     def resolve(cnf, max_solutions=0):
         # Execute clasp with cnf string as input
         cp = subprocess.run(
             ['clasp', '--verbose=0', '{0}'.format(max_solutions)], 
             input=cnf.encode('utf-8'), 
-            capture_output=True,
-            check=False
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE
         )
 
         stderr = str(cp.stderr, encoding='utf-8')
@@ -67,7 +83,7 @@ class Clasp:
         lines = stdout.split('\n')
         for line in lines:
             if line.startswith('v '):
-                solutions.append(line[2:].split(' ')[:-1])
+                solutions.append(list(map(int, line[2:].split(' ')[:-1])))
             elif line.startswith('s '):
                 break
         
@@ -78,10 +94,26 @@ class Clasp:
 #
 
 t = Table('sample.txt')
-t.getCell(5, 0)
-t.setCell(1, 1, '*')
+#t.getCell(5, 0)
+#t.setCell(1, 1, '0')
 
-#print(t)
+print(t)
+print(t.getRow(0))
+print(t.getRow(1))
+print(t.getRow(2))
+print(t.getRow(3))
+print(t.getRow(4))
+print(t.getRow(5))
+
+print(' ')
+
+print(t.getColumn(0))
+print(t.getColumn(1))
+print(t.getColumn(2))
+print(t.getColumn(3))
+print(t.getColumn(4))
+print(t.getColumn(5))
+
 
 solutions = Clasp.resolve(
     'p cnf 3 2\n'
