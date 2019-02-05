@@ -59,14 +59,32 @@ class Table:
         return str
 
 class Clasp:
+    @staticmethod
+    def _cnf_format(n, p):
+        """ Description
+        Format a list of prepositions to clasp format.
+        Ex.
+        p cnf 3 2
+        -1 -3 0
+        -2 -3 0
 
+        :param n: number of variables
+        :param p: list of prepositions
+        """    
+        cnf = 'p cnf {0} {1}\n'.format(n, len(p))
+
+        for i in p:
+            for j in i:
+                cnf += '{} '.format(j)
+            cnf += '0\n'
+        return cnf.encode('utf-8')
 
     @staticmethod
-    def resolve(cnf, max_solutions=0):
+    def resolve(n, p, max_solutions=0):
         # Execute clasp with cnf string as input
         cp = subprocess.run(
             ['clasp', '--verbose=0', '{0}'.format(max_solutions)], 
-            input=cnf.encode('utf-8'), 
+            input=Clasp._cnf_format(n, p),
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE
         )
@@ -94,10 +112,11 @@ class Clasp:
 #
 
 t = Table('sample.txt')
-#t.getCell(5, 0)
-#t.setCell(1, 1, '0')
 
 print(t)
+
+print('Rows test')
+
 print(t.getRow(0))
 print(t.getRow(1))
 print(t.getRow(2))
@@ -105,7 +124,7 @@ print(t.getRow(3))
 print(t.getRow(4))
 print(t.getRow(5))
 
-print(' ')
+print('Columns text')
 
 print(t.getColumn(0))
 print(t.getColumn(1))
@@ -114,12 +133,17 @@ print(t.getColumn(3))
 print(t.getColumn(4))
 print(t.getColumn(5))
 
+print('Clasp test')
 
 solutions = Clasp.resolve(
-    'p cnf 3 2\n'
-    '-1 -3 0\n'
-    '-2 -3 0\n',
-    max_solutions=0
+    # Number of variables
+    3, 
+
+    # Preposition list
+    [
+        [-1, -3],
+        [-2, -3],
+    ]
 )
 
 print(solutions)
