@@ -53,7 +53,8 @@ class Table:
             str += self.__data[i]
         return str
     
-    # Note: Negatives values are white and
+    # Note: 
+    # Negative values are white and
     # positive values are black
     #
     # white = 0 with values < 0
@@ -207,7 +208,6 @@ def rule_2(size, index):
 #
 # Main
 #
-
 t = Table.from_file('sample.txt')
 print(t)
 print('')
