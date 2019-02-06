@@ -52,8 +52,11 @@ class Table:
             str += self.__data[i]
         return str
     
-    # Note: Negatives variables are white = 0 and
-    # positive variables are black = 1
+    # Note: Negatives values are white and
+    # positive values are black
+    #
+    # white = 0 with values < 0
+    # black = 1 with values > 0
     @staticmethod
     def from_values(size, values):
         t = Table()
@@ -146,8 +149,11 @@ class Clasp:
         return solutions, result
     
 
-# Note: Negatives variables are white = 0 and
-# positive variables are black = 1
+# Note: Negatives values are white and
+# positive values are black
+#
+# white = 0 with values < 0
+# black = 1 with values > 0
 def rule_table(t):
     row = []
     
