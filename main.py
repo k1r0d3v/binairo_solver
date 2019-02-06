@@ -2,6 +2,7 @@
 
 import subprocess
 import sys
+import math
 
 if (sys.version_info.major * 10 + sys.version_info.minor) < 35:
         raise Exception("Python 3.5 or a more recent version is required.")
@@ -58,12 +59,16 @@ class Table:
     # white = 0 with values < 0
     # black = 1 with values > 0
     @staticmethod
-    def from_values(size, values):
+    def from_values(values):
         t = Table()
-        t.__size = size
-        t.__data = list('.' * size * size)
+        t.__size = int(math.sqrt(len(values))) # len(values) = size * size
+        t.__data = list('.' * len(values)) # Fill data with empty chars
+        
         for i in values:
+            if (abs(i) - 1) > len(t.__data):
+                raise Exception('index out of range: {} in [{}, {})'.format(abs(i), 0, len(t.__data)))
             t.__data[abs(i) - 1] = '0' if i < 0 else '1'
+
         return t
 
     @staticmethod
@@ -164,6 +169,9 @@ def rule_table(t):
             row.append([i + 1])
     return row
 
+def rule_1(size, index):
+    pass
+
 # Generate prepositions for a row and a column
 # given his index
 def rule_2(size, index):
@@ -218,5 +226,5 @@ solutions, result = Clasp.resolve(
 
 for i in range(0, len(solutions)):
     print('Test solution {}'.format(i))
-    print(Table.from_values(size, solutions[i]))
+    print(Table.from_values(solutions[i]))
     print('')
