@@ -53,6 +53,15 @@ class Table:
         return str
     
     @staticmethod
+    def from_values(size, values):
+        t = Table()
+        t.__size = size
+        t.__data = list('.' * size * size)
+        for i in values:
+            t.__data[abs(i) - 1] = '0' if i < 0 else '1'
+        return t
+
+    @staticmethod
     def from_text(size, text):
         t = Table()
         t.__size = size
@@ -94,10 +103,11 @@ class Clasp:
 
     @staticmethod
     def resolve(variable_count, clauses, max_solutions=0):
+        cnf = Clasp._cnf_format(variable_count, clauses)
         # Execute clasp with cnf string as input
         cp = subprocess.run(
             ['clasp', '--verbose=0', '{0}'.format(max_solutions)], 
-            input=Clasp._cnf_format(variable_count, clauses),
+            input=cnf,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE
         )
@@ -107,20 +117,64 @@ class Clasp:
 
         # Raise a exception if stderr is not empty
         if len(stderr) != 0:
-            raise Exception(stderr)
+            raise Exception('{}\n{}'.format(cnf, stderr))
 
         # Parse the solutions
         result = None
         solutions = []
         lines = stdout.split('\n')
+        row = []
         for line in lines:
             if line.startswith('v '):
-                solutions.append(list(map(int, line[2:].split(' ')[:-1])))
+                tmp = list(map(int, line[2:].split(' ')))
+
+                # Only when the line ends with 0 is a full solution
+                # else is a partial solution
+                if tmp[-1] == 0:
+                    row.extend(tmp[:-1])
+                    solutions.append(row)
+                    row = []
+                else:
+                    row.extend(tmp)
+
             elif line.startswith('s '):
                 result = line[2:]
                 break
         
         return solutions, result
+    
+
+# Generate prepositions for a row and a column
+# given his index
+def rule_2(size, index):
+    assert size > 1, 'size too small'
+
+    half = size // 2
+
+    rows = []
+    cols = []
+
+    # Row index rules
+    for i in range(index * size, index * size + size - half + 1):
+        row = []
+        for j in range(0,  half):
+            row.append(i + j + 1)
+
+        rows.append(row)
+        rows.append(list(map(lambda x: -x, row)))
+
+    # Column index rules
+    for i in range(0, size - half + 1):
+        col = []
+        for j in range(0,  half):
+            col.append((i + j) * size + index + 1)
+
+        cols.append(col)
+        cols.append(list(map(lambda x: -x, col)))
+
+    rows.extend(cols)
+    return rows
+
 
 #
 # Main
@@ -130,25 +184,18 @@ t = Table.from_file('sample.txt')
 print(t)
 print('')
 
+size = 6
+rules = []
+for i in range(0, size):
+    rules.extend(rule_2(size, i))
+
 solutions, result = Clasp.resolve(
-    # Number of variables
-    4,
-
-    [
-        # CNF (1 and -2) or (-1 and 2 and -3) or (-2 and 3 and -4) or (-3 and 4)
-        [-1, -2, 4],
-        [1, 2, 3, 4],
-        [1, -3, -4],
-        [-2, -3],
-
-        # CNF -((1 and -2) or (-1 and 2 and -3) or (-2 and 3 and -4) or (-3 and 4))
-        [1, 2, -4],
-        [-1, -2, -3, -4],
-        [-1, 3, 4],
-        [2, 3],
-    ],
-    max_solutions=0
+    size * size, # Number of variables
+    rules,
+    max_solutions=2
 )
 
-print(solutions)
-print(result)
+for i in range(0, len(solutions)):
+    print('Test solution {}'.format(i))
+    print(Table.from_values(size, solutions[i]))
+    print('')
