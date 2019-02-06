@@ -52,6 +52,8 @@ class Table:
             str += self.__data[i]
         return str
     
+    # Note: Negatives variables are white = 0 and
+    # positive variables are black = 1
     @staticmethod
     def from_values(size, values):
         t = Table()
@@ -144,6 +146,18 @@ class Clasp:
         return solutions, result
     
 
+# Note: Negatives variables are white = 0 and
+# positive variables are black = 1
+def rule_table(t):
+    row = []
+    
+    for i, value in enumerate(t.data()):
+        if value == '0':
+            row.append([-(i + 1)])
+        elif value == '1':
+            row.append([i + 1])
+    return row
+
 # Generate prepositions for a row and a column
 # given his index
 def rule_2(size, index):
@@ -188,6 +202,7 @@ size = 6
 rules = []
 for i in range(0, size):
     rules.extend(rule_2(size, i))
+rules.extend(rule_table(t))
 
 solutions, result = Clasp.resolve(
     size * size, # Number of variables
