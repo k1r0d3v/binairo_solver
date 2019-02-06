@@ -3,6 +3,7 @@
 import subprocess
 import sys
 import math
+import itertools
 
 if (sys.version_info.major * 10 + sys.version_info.minor) < 35:
         raise Exception("Python 3.5 or a more recent version is required.")
@@ -170,9 +171,6 @@ def rule_table(t):
             row.append([i + 1])
     return row
 
-def rule_1(size, index):
-    pass
-
 # Generate prepositions for a row and a column
 # given his index
 def rule_2(size, index):
@@ -204,6 +202,8 @@ def rule_2(size, index):
     rows.extend(cols)
     return rows
 
+def rule_1(size, index):
+    pass
 
 #
 # Main
@@ -216,15 +216,30 @@ size = 6
 rules = []
 for i in range(0, size):
     rules.extend(rule_2(size, i))
-rules.extend(rule_table(t))
+#    rules.extend(rule_1(size, i))
+#rules.extend(rule_table(t))
+rules.extend(rows)
+
+"""
+rules.extend(rule_table(Table.from_text(6, 
+'100110'
+'011001'
+'010011'
+'101100'
+'110010'
+'001101')))
+"""
 
 solutions, result = Clasp.resolve(
     size * size, # Number of variables
     rules,
-    max_solutions=2
+    max_solutions=4
 )
 
 for i in range(0, len(solutions)):
-    print('Test solution {}'.format(i))
+    #if len(list(filter(lambda x: x < 0, solutions[i]))) != ((size * size) // 2):
+    #    raise Exception('fooo')
+
+    print('Test solution {}'.format(i + 1))
     print(Table.from_values(solutions[i]))
     print('')
