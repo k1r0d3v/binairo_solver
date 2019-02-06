@@ -103,6 +103,10 @@ class Rules:
                     self.__clauses.append([num, num + self.__size, num + self.__size * 2])
                     self.__clauses.append([- num, - num - self.__size, - num - self.__size * 2])
     
+    def row_column_not_equals(self):
+        for i in range(0,self.__size-1):
+
+
     def aplicate_rules(self):
         self.not_more_than_two()
         return self.__clauses
