@@ -163,7 +163,7 @@ class Clasp:
 # black = 1 with values > 0
 def rule_table(t):
     row = []
-    
+
     for i, value in enumerate(t.data()):
         if value == '0':
             row.append([-(i + 1)])
@@ -176,24 +176,25 @@ def rule_table(t):
 def rule_2(size, index):
     assert size > 1, 'size too small'
 
-    half = size // 2
-
+    if size < 3:
+        return []
+    
     rows = []
     cols = []
 
     # Row index rules
-    for i in range(index * size, index * size + size - half + 1):
+    for i in range(index * size, index * size + size - 3 + 1):
         row = []
-        for j in range(0,  half):
+        for j in range(0,  3):
             row.append(i + j + 1)
 
         rows.append(row)
         rows.append(list(map(lambda x: -x, row)))
 
     # Column index rules
-    for i in range(0, size - half + 1):
+    for i in range(0, size - 3 + 1):
         col = []
-        for j in range(0,  half):
+        for j in range(0,  3):
             col.append((i + j) * size + index + 1)
 
         cols.append(col)
@@ -202,8 +203,31 @@ def rule_2(size, index):
     rows.extend(cols)
     return rows
 
+def rule_1_base(rows, row, col, cnt, size, offset):
+    if len(row) == size and cnt != 0:
+        return
+
+    if len(row) == size:
+        rows.append(row)
+        rows.append(col)
+        return
+
+    if cnt != 0:
+        rule_1_base(rows, row + [len(row) + 1 + offset * size], col + [len(col) * size + 1 + offset], cnt - 1, size, offset)
+
+    rule_1_base(rows, row + [-(len(row) + 1 + offset * size)], col + [-(len(col) * size + 1 + offset)], cnt, size, offset)
+
 def rule_1(size, index):
-    pass
+    cnt = size // 2
+    rows = []
+    for i in range(0, cnt):
+        rule_1_base(rows, [], [], i, size, index)
+
+    tmp = rows.copy()
+    tmp = list(map(lambda r: list(map(lambda x: -x, r)), tmp))
+
+    rows.extend(tmp)
+    return rows
 
 #
 # Main
@@ -216,9 +240,8 @@ size = 6
 rules = []
 for i in range(0, size):
     rules.extend(rule_2(size, i))
-#    rules.extend(rule_1(size, i))
-#rules.extend(rule_table(t))
-rules.extend(rows)
+    rules.extend(rule_1(size, i))
+rules.extend(rule_table(t))
 
 """
 rules.extend(rule_table(Table.from_text(6, 
@@ -230,10 +253,11 @@ rules.extend(rule_table(Table.from_text(6,
 '001101')))
 """
 
+
 solutions, result = Clasp.resolve(
     size * size, # Number of variables
     rules,
-    max_solutions=4
+    max_solutions=0
 )
 
 for i in range(0, len(solutions)):
