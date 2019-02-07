@@ -171,8 +171,44 @@ def rule_table(t):
             row.append([i + 1])
     return row
 
-# Generate prepositions for a row and a column
-# given his index
+def rule_1_base(rows, row, col, cnt, size, offset):
+    if len(row) == size and cnt != 0:
+        return
+
+    if len(row) == size:
+        rows.append(row)
+        rows.append(col)
+        return
+
+    if cnt != 0:
+        rule_1_base(rows, row + [len(row) + 1 + offset * size], col + [len(col) * size + 1 + offset], cnt - 1, size, offset)
+
+    rule_1_base(rows, row + [-(len(row) + 1 + offset * size)], col + [-(len(col) * size + 1 + offset)], cnt, size, offset)
+
+# TODO: Explain
+#
+# Cases not in permutations of
+# |0|0|0|1|1|1|
+#
+def rule_1(size, index):
+    cnt = size // 2
+    rows = []
+    for i in range(0, cnt):
+        rule_1_base(rows, [], [], i, size, index)
+
+    tmp = rows.copy()
+    tmp = list(map(lambda r: list(map(lambda x: -x, r)), tmp))
+
+    rows.extend(tmp)
+    return rows
+
+# TODO: Explain
+#
+# |0|0|0|x|x|x|
+# |x|0|0|0|x|x|
+# |x|x|0|0|0|x|
+# |x|x|x|0|0|0|
+#
 def rule_2(size, index):
     assert size > 1, 'size too small'
 
@@ -203,45 +239,95 @@ def rule_2(size, index):
     rows.extend(cols)
     return rows
 
-def rule_1_base(rows, row, col, cnt, size, offset):
-    if len(row) == size and cnt != 0:
-        return
+# TODO: Explain
+#
+def rule_3(size):
+    assert size > 1, 'size too small'
+    
+    clause = []
+    
+    for k in range(0, size - 1):
+        for i in range(0, size - k - 1):
+            row = []
+            row.append([k * size + 1, (k + i + 1) * size + 1])
+            row.append([-k * size - 1, -(k + i + 1) * size - 1])
+            col = []
+            col.append([k + 1, (k + i + 1) + 1])
+            col.append([-k - 1, -(k + i + 1) - 1])
+            for j in range(1,  size):
+                aux=[]
+                for count in range(0, len(row)):
+                    clone=row[count].copy()
+                    row[count].extend([k * size + j + 1, (k + i + 1) * size + j + 1])
+                    clone.extend([-k * size -j - 1, -(k + i + 1) * size -j - 1])
+                    aux.append(row[count])
+                    aux.append(clone)
 
-    if len(row) == size:
-        rows.append(row)
-        rows.append(col)
-        return
+                    clone=col[count].copy()
+                    col[count].extend([j * size + k + 1, j * size + k + i + 1])
+                    clone.extend([-k * size - j - 1, - j * size - k - i - 1])
+                    col.append(clone)
+                row=aux
+            clause.extend(row)
+            clause.extend(col)
+    return clause
 
-    if cnt != 0:
-        rule_1_base(rows, row + [len(row) + 1 + offset * size], col + [len(col) * size + 1 + offset], cnt - 1, size, offset)
-
-    rule_1_base(rows, row + [-(len(row) + 1 + offset * size)], col + [-(len(col) * size + 1 + offset)], cnt, size, offset)
-
-def rule_1(size, index):
-    cnt = size // 2
-    rows = []
-    for i in range(0, cnt):
-        rule_1_base(rows, [], [], i, size, index)
-
-    tmp = rows.copy()
-    tmp = list(map(lambda r: list(map(lambda x: -x, r)), tmp))
-
-    rows.extend(tmp)
-    return rows
 
 #
 # Main
 #
+t = Table.from_text(20,
+    '........1.1..1.....1'
+    '......0.....0....0.1'
+    '...............01...'
+    '.0..1.1.0.0.........'
+    '1.0......1....0..0..'
+    '...0..0........1..1.'
+    '..00..0.0..00......0'
+    '.......1...0.....0..'
+    '10.1.11......00.....'
+    '...........0..00.1.0'
+    '.......0.......0..0.'
+    '..0.1...0.......1...'
+    '....11.....0.0......'
+    '...1.1...00.1.1.....'
+    '..1.............1.00'
+    '...1..1..0..00.....0'
+    '.....1...0......1...'
+    '0.1...............11'
+    '...1.....1..11...0..'
+    '..11..11.....1.....1'
+)
+"""
+t = Table.from_text(6,
+    '.1....'
+    '.....0'
+    '..0..0'
+    '1..1..'
+    '....1.'
+    '.....0'
+)
+"""
+
+"""
 t = Table.from_file('sample.txt')
+"""
+
 print(t)
 print('')
 
-size = 6
+size = t.size()
 rules = []
+
+# Initial state rule
+rules.extend(rule_table(t))
+
+# The three conditions rules
 for i in range(0, size):
     rules.extend(rule_2(size, i))
     rules.extend(rule_1(size, i))
-rules.extend(rule_table(t))
+rules.extend(rule_3(size))
+
 
 """
 rules.extend(rule_table(Table.from_text(6, 
@@ -253,7 +339,6 @@ rules.extend(rule_table(Table.from_text(6,
 '001101')))
 """
 
-
 solutions, result = Clasp.resolve(
     size * size, # Number of variables
     rules,
@@ -261,9 +346,6 @@ solutions, result = Clasp.resolve(
 )
 
 for i in range(0, len(solutions)):
-    #if len(list(filter(lambda x: x < 0, solutions[i]))) != ((size * size) // 2):
-    #    raise Exception('fooo')
-
     print('Test solution {}'.format(i + 1))
     print(Table.from_values(solutions[i]))
     print('')
