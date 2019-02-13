@@ -305,63 +305,6 @@ def rule_3(table):
                 count += size
     return clauses
 
-
-""" row = []
-row.append([k * size + 1, (k + i + 1) * size + 1])
-row.append([-k * size - 1, -(k + i + 1) * size - 1])
-col = []
-col.append([k + 1, (k + i + 1) + 1])
-col.append([-k - 1, -(k + i + 1) - 1])
-for j in range(1,  size):
-    aux=[]
-    for count in range(0, len(row)):
-        clone=row[count].copy()
-        row[count].extend([k * size + j + 1, (k + i + 1) * size + j + 1])
-        clone.extend([-k * size -j - 1, -(k + i + 1) * size -j - 1])
-        aux.append(row[count])
-        aux.append(clone)
-
-        clone=col[count].copy()
-        col[count].extend([j * size + k + 1, j * size + k + i + 1])
-        clone.extend([-k * size - j - 1, - j * size - k - i - 1])
-        col.append(clone)
-    row=aux
-clause.extend(row)
-clause.extend(col)
-    
-def rule_3(size):
-    assert size > 1, 'size too small'
-    
-    clause = []
-    
-    
-    for k in range(0, size - 1):
-        for i in range(0, size - k - 1):
-            row = []
-            row.append([k * size + 1, (k + i + 1) * size + 1])
-            row.append([-k * size - 1, -(k + i + 1) * size - 1])
-            col = []
-            col.append([k + 1, (k + i + 1) + 1])
-            col.append([-k - 1, -(k + i + 1) - 1])
-            for j in range(1,  size):
-                aux=[]
-                for count in range(0, len(row)):
-                    clone=row[count].copy()
-                    row[count].extend([k * size + j + 1, (k + i + 1) * size + j + 1])
-                    clone.extend([-k * size -j - 1, -(k + i + 1) * size -j - 1])
-                    aux.append(row[count])
-                    aux.append(clone)
-
-                    clone=col[count].copy()
-                    col[count].extend([j * size + k + 1, j * size + k + i + 1])
-                    clone.extend([-k * size - j - 1, - j * size - k - i - 1])
-                    col.append(clone)
-                row=aux
-            clause.extend(row)
-            clause.extend(col)
-    return clause
-"""
-
 #
 # Main
 #
