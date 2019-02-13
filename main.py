@@ -3,6 +3,7 @@
 import subprocess
 import sys
 import math
+import itertools
 
 if (sys.version_info.major * 10 + sys.version_info.minor) < 35:
         raise Exception("Python 3.5 or a more recent version is required.")
@@ -93,45 +94,6 @@ class Table:
         raise Exception()
 
 
-class Rules:
-    def __init__(self, table):
-        self.__table = table
-        self.__clauses = []
-        self.__size = table.size()
-
-    def not_more_than_two(self):
-        for i in range(0,self.__size-1):
-            row = self.__table.getRow(i)
-            for j in range(0,self.__size-3):
-                num = i * self.__size + j + 1
-                if row[j] == '0':
-                    self.__clauses.append([num, num + 1, num + 2])
-                elif row[j] == '1':
-                    self.__clauses.append([- num, - num - 1, - num - 2])
-                else:
-                    self.__clauses.append([num, num + 1, num + 2])
-                    self.__clauses.append([- num, - num - 1, - num - 2])
-
-            column = self.__table.getColumn(i)      
-            for j in range(0,self.__size-3):
-                num = j * self.__size + i + 1
-                if column[j] == '0':
-                    self.__clauses.append([num, num + self.__size, num + self.__size * 2])
-                elif column[j] == '1':
-                    self.__clauses.append([- num, - num - self.__size, - num - self.__size * 2])
-                else:
-                    self.__clauses.append([num, num + self.__size, num + self.__size * 2])
-                    self.__clauses.append([- num, - num - self.__size, - num - self.__size * 2])
-    
-    """def row_column_not_equals(self):
-        for i in range(0,self.__size-1):"""
-
-
-    def aplicate_rules(self):
-        self.not_more_than_two()
-        return self.__clauses
-
-
 class Clasp:
     @staticmethod
     def _cnf_format(variable_count, clauses):
@@ -201,7 +163,7 @@ class Clasp:
 # black = 1 with values > 0
 def rule_table(t):
     row = []
-    
+
     for i, value in enumerate(t.data()):
         if value == '0':
             row.append([-(i + 1)])
@@ -209,32 +171,66 @@ def rule_table(t):
             row.append([i + 1])
     return row
 
-def rule_1(size, index):
-    pass
+def rule_1_base(rows, row, col, cnt, size, offset):
+    if len(row) == size and cnt != 0:
+        return
 
-# Generate prepositions for a row and a column
-# given his index
+    if len(row) == size:
+        rows.append(row)
+        rows.append(col)
+        return
+
+    if cnt != 0:
+        rule_1_base(rows, row + [len(row) + 1 + offset * size], col + [len(col) * size + 1 + offset], cnt - 1, size, offset)
+
+    rule_1_base(rows, row + [-(len(row) + 1 + offset * size)], col + [-(len(col) * size + 1 + offset)], cnt, size, offset)
+
+# TODO: Explain
+#
+# Cases not in permutations of
+# |0|0|0|1|1|1|
+#
+def rule_1(size, index):
+    cnt = size // 2
+    rows = []
+    for i in range(0, cnt):
+        rule_1_base(rows, [], [], i, size, index)
+
+    tmp = rows.copy()
+    tmp = list(map(lambda r: list(map(lambda x: -x, r)), tmp))
+
+    rows.extend(tmp)
+    return rows
+
+# TODO: Explain
+#
+# |0|0|0|x|x|x|
+# |x|0|0|0|x|x|
+# |x|x|0|0|0|x|
+# |x|x|x|0|0|0|
+#
 def rule_2(size, index):
     assert size > 1, 'size too small'
 
-    half = size // 2
-
+    if size < 3:
+        return []
+    
     rows = []
     cols = []
 
     # Row index rules
-    for i in range(index * size, index * size + size - half + 1):
+    for i in range(index * size, index * size + size - 3 + 1):
         row = []
-        for j in range(0,  half):
+        for j in range(0,  3):
             row.append(i + j + 1)
 
         rows.append(row)
         rows.append(list(map(lambda x: -x, row)))
 
     # Column index rules
-    for i in range(0, size - half + 1):
+    for i in range(0, size - 3 + 1):
         col = []
-        for j in range(0,  half):
+        for j in range(0,  3):
             col.append((i + j) * size + index + 1)
 
         cols.append(col)
@@ -308,26 +304,76 @@ def rule_3(table):
 #
 # Main
 #
+t = Table.from_text(20,
+    '........1.1..1.....1'
+    '......0.....0....0.1'
+    '...............01...'
+    '.0..1.1.0.0.........'
+    '1.0......1....0..0..'
+    '...0..0........1..1.'
+    '..00..0.0..00......0'
+    '.......1...0.....0..'
+    '10.1.11......00.....'
+    '...........0..00.1.0'
+    '.......0.......0..0.'
+    '..0.1...0.......1...'
+    '....11.....0.0......'
+    '...1.1...00.1.1.....'
+    '..1.............1.00'
+    '...1..1..0..00.....0'
+    '.....1...0......1...'
+    '0.1...............11'
+    '...1.....1..11...0..'
+    '..11..11.....1.....1'
+)
+"""
+t = Table.from_text(6,
+    '.1....'
+    '.....0'
+    '..0..0'
+    '1..1..'
+    '....1.'
+    '.....0'
+)
+"""
 
+"""
 t = Table.from_file('sample.txt')
+"""
+
 print(t)
 print('')
 
-size = 6
+size = t.size()
 rules = []
+
+# Initial state rule
+rules.extend(rule_table(t))
+
+# The three conditions rules
 for i in range(0, size):
     rules.extend(rule_2(size, i))
-rules.extend(rule_table(t))
-rule_3(t)
-#rules.extend(rule_3(size))
+    #rules.extend(rule_1(size, i))
+rules.extend(rule_3(t))
+
+
+"""
+rules.extend(rule_table(Table.from_text(6, 
+'100110'
+'011001'
+'010011'
+'101100'
+'110010'
+'001101')))
+"""
 
 solutions, result = Clasp.resolve(
     size * size, # Number of variables
     rules,
-    max_solutions=2
+    max_solutions=0
 )
 
 for i in range(0, len(solutions)):
-    print('Test solution {}'.format(i))
+    print('Test solution {}'.format(i + 1))
     print(Table.from_values(solutions[i]))
     print('')
