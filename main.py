@@ -242,11 +242,98 @@ def rule_2(size, index):
 
     rows.extend(cols)
     return rows
+
+def equal_row(table, fila1, fila2):
+    for i in range(0, table.size()):
+        cell1 = table.getCell(i, fila1)
+        cell2 = table.getCell(i, fila2)
+        if cell1 != '.' and cell2 != '.':
+            if cell1 != cell2:
+                return False
+    return True
+
+def equal_column(table, col1, col2):
+    for i in range(0, table.size()):
+        cell1 = table.getCell(col1, i)
+        cell2 = table.getCell(col2, i)
+        if cell1 != '.' and cell2 != '.':
+            if cell1 != cell2:
+                return False
+    return True           
+
+def proposicional_logic_row(size, count, fila1, fila2):
+    sum1 = size * fila1
+    sum2 = size * fila2
+    clauses = []
+    aux = []
+    for i in range(1, size+1):
+        count += 1
+        clauses.append([-count, i + sum1, i + sum2])
+        clauses.append([-count, -(i + sum1), -(i + sum2)])
+        clauses.append([count, -(i + sum1), -(i + sum2)])
+        clauses.append([count, i + sum1, -(i + sum2)])
+        aux.extend([count])
+    clauses.append(aux)
+    return clauses
+
+def proposicional_logic_column(size, count, fila1, fila2):
+    sum1 = fila1 + 1
+    sum2 = fila2 + 1
+    clauses = []
+    aux = []
+    for i in range(0, size):
+        count += 1
+        clauses.append([-count, i * size + sum1, i * size + sum2])
+        clauses.append([-count, -(i * size + sum1), -(i * size + sum2)])
+        clauses.append([count, -(i * size + sum1), -(i * size + sum2)])
+        clauses.append([count, i * size + sum1, -(i * size + sum2)])
+        aux.extend([count])
+    clauses.append(aux)
+    return clauses
+
+def rule_3(table):
+    size = table.size()
+    count = size * size + 1
+    clauses = []
+    for k in range(0, size - 1):
+        for i in range(k + 1, size):
+            if equal_row(table, k, i):
+                clauses.append(proposicional_logic_row(size, count, k, i))
+                count += size
+            if equal_column(table, k, i):
+                clauses.append(proposicional_logic_column(size, count, k, i))
+                count += size
+    return clauses
+
+
+""" row = []
+row.append([k * size + 1, (k + i + 1) * size + 1])
+row.append([-k * size - 1, -(k + i + 1) * size - 1])
+col = []
+col.append([k + 1, (k + i + 1) + 1])
+col.append([-k - 1, -(k + i + 1) - 1])
+for j in range(1,  size):
+    aux=[]
+    for count in range(0, len(row)):
+        clone=row[count].copy()
+        row[count].extend([k * size + j + 1, (k + i + 1) * size + j + 1])
+        clone.extend([-k * size -j - 1, -(k + i + 1) * size -j - 1])
+        aux.append(row[count])
+        aux.append(clone)
+
+        clone=col[count].copy()
+        col[count].extend([j * size + k + 1, j * size + k + i + 1])
+        clone.extend([-k * size - j - 1, - j * size - k - i - 1])
+        col.append(clone)
+    row=aux
+clause.extend(row)
+clause.extend(col)
     
 def rule_3(size):
     assert size > 1, 'size too small'
     
     clause = []
+    
     
     for k in range(0, size - 1):
         for i in range(0, size - k - 1):
@@ -273,7 +360,7 @@ def rule_3(size):
             clause.extend(row)
             clause.extend(col)
     return clause
-
+"""
 
 #
 # Main
@@ -288,7 +375,8 @@ rules = []
 for i in range(0, size):
     rules.extend(rule_2(size, i))
 rules.extend(rule_table(t))
-rules.extend(rule_3(size))
+rule_3(t)
+#rules.extend(rule_3(size))
 
 solutions, result = Clasp.resolve(
     size * size, # Number of variables
