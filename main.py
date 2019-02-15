@@ -213,13 +213,13 @@ def test_rule_1():
 
 
 def rule_1_base(rows, row, cnt, size):    
-    """
+    
     if len(row) > 2:
         if row[-1] < 0 and row[-2] < 0 and row[-3] < 0:
             return        
         if row[-1] > 0 and row[-2] > 0 and row[-3] > 0:
             return
-    """
+    
     
     if len(row) == size and cnt != 0:
         return
@@ -313,18 +313,18 @@ def rule_2(size):
 # Main
 #
 #t = Table.from_file('samples/1_6x6.txt')
-# t = Table.from_file('samples/1_6x6.txt')
-# t = Table.from_file('samples/2_8x8.txt')
-# t = Table.from_file('samples/3_8x8.txt')
-# t = Table.from_file('samples/4_10x10.txt')
-# t = Table.from_file('samples/5_10x10.txt')
-t = Table.from_file('samples/6_14x14.txt')
-# t = Table.from_file('samples/7_14x14.txt')
-# t = Table.from_file('samples/8_20x20.txt')
-# t = Table.from_file('samples/9_20x20.txt')
-# t = Table.from_file('samples/10_24x24.txt')
-# t = Table.from_file('samples/11_30x30.txt')
-# t = Table.from_file('samples/12_34x34.txt')
+#t = Table.from_file('samples/1_6x6.txt')
+#t = Table.from_file('samples/2_8x8.txt')
+#t = Table.from_file('samples/3_8x8.txt')
+#t = Table.from_file('samples/4_10x10.txt')
+#t = Table.from_file('samples/5_10x10.txt')
+#t = Table.from_file('samples/6_14x14.txt')
+#t = Table.from_file('samples/7_14x14.txt')
+#t = Table.from_file('samples/8_20x20.txt')
+t = Table.from_file('samples/9_20x20.txt')
+#t = Table.from_file('samples/10_24x24.txt')
+#t = Table.from_file('samples/11_30x30.txt')
+#t = Table.from_file('samples/12_34x34.txt')
 
 
 print('{}\n'.format(t))
@@ -337,7 +337,7 @@ rules.extend(rule_table(t))
 
 # The three conditions rules
 rules.extend(rule_1(size))
-#rules.extend(rule_2(size))
+rules.extend(rule_2(size))
 """
 rules.extend(rule_3(t))
 """
