@@ -171,36 +171,106 @@ def rule_table(t):
             row.append([i + 1])
     return row
 
-def rule_1_base(rows, row, col, cnt, size, offset):
+"""
+# Converts a list of lists to a format that understand wolfram
+def to_wolfram(l, alphabet = 'ABCDEFGHIKLMNOPQRSTVXYZ', sand = ' && ', sor = ' || ', snot = '~'):    
+    r = ''
+    for i in l:
+        r += '('
+        for n, j in enumerate(i):
+            r += '{}{}'.format(snot, alphabet[n]) if j <= 0 else '{}'.format(alphabet[n])
+            if n != len(i) - 1:
+                r += sand                
+        r += ')' + sor
+
+    return r[:-len(sor)]
+
+
+def test_rule_1():
+    def has_three(l):
+        if len(l) < 3:
+            return False
+        
+        for i in range(0, len(l) - 2):
+            if l[i] == 1 and l[i + 1] == 1 and l[i + 2] == 1:
+                return True
+            elif l[i] == 0 and l[i + 1] == 0 and l[i + 2] == 0:
+                return True
+
+        return False
+
+    test = [0, 0, 1, 1, 1, 1]
+    all = list(set(itertools.permutations(test)))
+    valids = []
+    for i in all:        
+        if not has_three(i):
+            valids.append(i)
+    
+    print('TEST ALL DNF:' + to_wolfram(all))    
+    print('TEST VALIDS DNF:' + to_wolfram(valids))
+    return []
+"""
+
+
+def rule_1_base(rows, row, cnt, size):    
+    
+    if len(row) > 2:
+        if row[-1] < 0 and row[-2] < 0 and row[-3] < 0:
+            return        
+        if row[-1] > 0 and row[-2] > 0 and row[-3] > 0:
+            return
+    
+    
     if len(row) == size and cnt != 0:
         return
 
     if len(row) == size:
         rows.append(row)
-        rows.append(col)
         return
 
     if cnt != 0:
-        rule_1_base(rows, row + [len(row) + 1 + offset * size], col + [len(col) * size + 1 + offset], cnt - 1, size, offset)
+        rule_1_base(rows, row + [1], cnt - 1, size)
 
-    rule_1_base(rows, row + [-(len(row) + 1 + offset * size)], col + [-(len(col) * size + 1 + offset)], cnt, size, offset)
+    row.append(-1)
+    rule_1_base(rows, row, cnt, size)
 
 # TODO: Explain
 #
 # Cases not in permutations of
 # |0|0|0|1|1|1|
 #
-def rule_1(size, index):
+def rule_1(size):
     cnt = size // 2
     rows = []
+
+    # Base row generation
+    base = []
     for i in range(0, cnt):
-        rule_1_base(rows, [], [], i, size, index)
+        rule_1_base(base, [], i, size)
 
-    tmp = rows.copy()
-    tmp = list(map(lambda r: list(map(lambda x: -x, r)), tmp))
+    for i in base:        
+        for w in range(0, size):
+            # Generate rows base
+            # Generate columns base
+            row = []
+            col = []
+            for j, k in enumerate(i):
+                row.append(i[j] * (j + 1 + w * size))
+                col.append(k * (j * size + 1 + w))
+            rows.append(row)                
+            rows.append(col)
+            
+            row = row.copy()
+            col = col.copy()
+            for j in range(0, size):
+                row[j] *= -1
+                col[j] *= -1
+            rows.append(row)
+            rows.append(col)
+            
 
-    rows.extend(tmp)
     return rows
+
 
 # TODO: Explain
 #
@@ -208,8 +278,7 @@ def rule_1(size, index):
 # |x|0|0|0|x|x|
 # |x|x|0|0|0|x|
 # |x|x|x|0|0|0|
-#
-def rule_2(size, index):
+def rule_2(size):
     assert size > 1, 'size too small'
 
     if size < 3:
@@ -218,23 +287,24 @@ def rule_2(size, index):
     rows = []
     cols = []
 
-    # Row index rules
-    for i in range(index * size, index * size + size - 3 + 1):
-        row = []
-        for j in range(0,  3):
-            row.append(i + j + 1)
+    for index in range(0, size):
+        # Row index rules
+        for i in range(index * size, index * size + size - 3 + 1):
+            row = []
+            for j in range(0,  3):
+                row.append(i + j + 1)
 
-        rows.append(row)
-        rows.append(list(map(lambda x: -x, row)))
+            rows.append(row)
+            rows.append(list(map(lambda x: -x, row)))
 
-    # Column index rules
-    for i in range(0, size - 3 + 1):
-        col = []
-        for j in range(0,  3):
-            col.append((i + j) * size + index + 1)
+        # Column index rules
+        for i in range(0, size - 3 + 1):
+            col = []
+            for j in range(0,  3):
+                col.append((i + j) * size + index + 1)
 
-        cols.append(col)
-        cols.append(list(map(lambda x: -x, col)))
+            cols.append(col)
+            cols.append(list(map(lambda x: -x, col)))
 
     rows.extend(cols)
     return rows
@@ -318,50 +388,26 @@ def rule_3_without(table):
                 count += 1
                 clauses.extend(propositional_logic(count, j * size + k + 1, j * size + i + 1))
     return count, clauses
-    
+
 #
 # Main
 #
-
-t = Table.from_text(20,
-    '........1.1..1.....1'
-    '......0.....0....0.1'
-    '...............01...'
-    '.0..1.1.0.0.........'
-    '1.0......1....0..0..'
-    '...0..0........1..1.'
-    '..00..0.0..00......0'
-    '.......1...0.....0..'
-    '10.1.11......00.....'
-    '...........0..00.1.0'
-    '.......0.......0..0.'
-    '..0.1...0.......1...'
-    '....11.....0.0......'
-    '...1.1...00.1.1.....'
-    '..1.............1.00'
-    '...1..1..0..00.....0'
-    '.....1...0......1...'
-    '0.1...............11'
-    '...1.....1..11...0..'
-    '..11..11.....1.....1'
-)
-"""
-t = Table.from_text(6,
-    '.1....'
-    '.....0'
-    '..0..0'
-    '1..1..'
-    '....1.'
-    '.....0'
-)
-"""
+#t = Table.from_file('samples/1_6x6.txt')
+#t = Table.from_file('samples/1_6x6.txt')
+#t = Table.from_file('samples/2_8x8.txt')
+t = Table.from_file('samples/3_8x8.txt')
+#t = Table.from_file('samples/4_10x10.txt')
+#t = Table.from_file('samples/5_10x10.txt')
+#t = Table.from_file('samples/6_14x14.txt')
+#t = Table.from_file('samples/7_14x14.txt')
+#t = Table.from_file('samples/8_20x20.txt')
+#t = Table.from_file('samples/9_20x20.txt')
+#t = Table.from_file('samples/10_24x24.txt')
+#t = Table.from_file('samples/11_30x30.txt')
+#t = Table.from_file('samples/12_34x34.txt')
 
 
-t = Table.from_file('sample.txt')
-
-
-print(t)
-print('')
+print('{}\n'.format(t))
 
 size = t.size()
 rules = []
@@ -370,31 +416,20 @@ rules = []
 rules.extend(rule_table(t))
 
 # The three conditions rules
-for i in range(0, size):
-    rules.extend(rule_2(size, i))
-    rules.extend(rule_1(size, i))
+rules.extend(rule_1(size))
+rules.extend(rule_2(size))
 variable_count, clauses = rule_3_without(t)
 rules.extend(clauses)
-print("Fin")
-
-
-"""
-rules.extend(rule_table(Table.from_text(6, 
-'100110'
-'011001'
-'010011'
-'101100'
-'110010'
-'001101')))
-"""
 
 solutions, result = Clasp.resolve(
     variable_count, # Number of variables
     rules,
-    max_solutions=0
+    max_solutions=10
 )
 
 for i in range(0, len(solutions)):
     print('Test solution {}'.format(i + 1))
-    print(Table.from_values(solutions[i][0: size * size]))
-    print('')
+    t = Table.from_values(solutions[i][0: size * size])
+    for j in range(0, size):
+        row = t.getRow(j)
+        print('{} - zeros: {}'.format(row, len(list(filter(lambda x: x == '0', row)))))
