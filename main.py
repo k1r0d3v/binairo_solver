@@ -248,7 +248,7 @@ def equal_row(table, fila1, fila2):
                 return False
     return True
 
-def equal_column(table, col1, col2):
+def equals(table, col1, col2):
     for i in range(0, table.size()):
         cell1 = table.getCell(col1, i)
         cell2 = table.getCell(col2, i)
@@ -258,15 +258,15 @@ def equal_column(table, col1, col2):
     return True           
 
 def proposicional_logic_row(size, count, fila1, fila2):
-    sum1 = size * fila1
-    sum2 = size * fila2
+    sum1 = size * fila1 + 1
+    sum2 = size * fila2 + 1
     clauses = []
     aux = []
     for i in range(1, size+1):
         count += 1
         clauses.append([-count, i + sum1, i + sum2])
         clauses.append([-count, -(i + sum1), -(i + sum2)])
-        clauses.append([count, -(i + sum1), -(i + sum2)])
+        clauses.append([count, -(i + sum1), i + sum2])
         clauses.append([count, i + sum1, -(i + sum2)])
         aux.extend([count])
     clauses.append(aux)
@@ -281,12 +281,84 @@ def proposicional_logic_column(size, count, fila1, fila2):
         count += 1
         clauses.append([-count, i * size + sum1, i * size + sum2])
         clauses.append([-count, -(i * size + sum1), -(i * size + sum2)])
-        clauses.append([count, -(i * size + sum1), -(i * size + sum2)])
+        clauses.append([count, -(i * size + sum1), i * size + sum2])
         clauses.append([count, i * size + sum1, -(i * size + sum2)])
         aux.extend([count])
     clauses.append(aux)
     return clauses
 
+def propositional_logic(atm, num1, num2):
+    clauses = []
+    clauses.append([-atm, num1, num2])
+    clauses.append([-atm, -num1, -num2])
+    clauses.append([atm, -num1, num2])
+    clauses.append([atm, num1, -num2])
+    return clauses
+
+
+def rule_3(table):
+    size = table.size()
+    distintRow = False
+    distintCol = False
+    count = size * size
+    countRow = size * size
+    countCol = size * size + size
+    clauses = []
+    rows = []
+    cols = []
+    for k in range(0, size - 1):
+        for i in range(k + 1, size):
+            for j in range(0, size):
+                if not distintRow:
+                    if not equals(table, table.getCell(j, k), table.getCell(j, i)):
+                        #Borrar cosas demas y restar contador
+                        distintRow = True
+                        countRow -= j                        
+                        count -= j
+                        rows = []
+                    else:
+                        countRow += 1
+                        count += 1
+                        rows.extend(propositional_logic(count, j + size * k + 1, j + size * i + 1))
+
+                if not distintCol: 
+                    if not equals(table, table.getCell(k, j), table.getCell(i, j)):
+                        #Borrar cosas demas y restar contador
+                        distintCol = True   
+                        countCol -= j
+                        count -= j
+                        cols = []
+                    else:      
+                        countCol += 1
+                        count += 1                  
+                        cols.extend(propositional_logic(count, j * size + k + 1, j * size + i + 1))
+                #Poner false sumar contadores añadir clausulas
+            clauses.extend(rows)
+            clauses.extend(cols)
+            if distintRow:
+                distintRow = False
+            else:
+                countRow += size
+            if distintCol:
+                distintCol = False
+            else:
+                countCol += size
+
+    return count, clauses
+
+def rule_3_without(table):
+    size = table.size()
+    count = size * size
+    clauses = []
+    for k in range(0, size - 1):
+        for i in range(k + 1, size):
+            for j in range(0, size):
+                count += 1
+                clauses.extend(propositional_logic(count, j + size * k + 1, j + size * i + 1))
+                count += 1
+                clauses.extend(propositional_logic(count, j * size + k + 1, j * size + i + 1))
+    return count, clauses
+"""
 def rule_3(table):
     size = table.size()
     count = size * size + 1
@@ -294,16 +366,16 @@ def rule_3(table):
     for k in range(0, size - 1):
         for i in range(k + 1, size):
             if equal_row(table, k, i):
-                clauses.append(proposicional_logic_row(size, count, k, i))
+                clauses.extend(proposicional_logic_row(size, count, k, i))
                 count += size
             if equal_column(table, k, i):
-                clauses.append(proposicional_logic_column(size, count, k, i))
+                clauses.extend(proposicional_logic_column(size, count, k, i))
                 count += size
-    return clauses
-
+    return clauses"""
 #
 # Main
 #
+
 t = Table.from_text(20,
     '........1.1..1.....1'
     '......0.....0....0.1'
@@ -337,9 +409,9 @@ t = Table.from_text(6,
 )
 """
 
-"""
+
 t = Table.from_file('sample.txt')
-"""
+
 
 print(t)
 print('')
@@ -353,8 +425,10 @@ rules.extend(rule_table(t))
 # The three conditions rules
 for i in range(0, size):
     rules.extend(rule_2(size, i))
-    #rules.extend(rule_1(size, i))
-rules.extend(rule_3(t))
+    rules.extend(rule_1(size, i))
+variable_count, clauses = rule_3_without(t)
+rules.extend(clauses)
+print("Fin")
 
 
 """
@@ -368,12 +442,12 @@ rules.extend(rule_table(Table.from_text(6,
 """
 
 solutions, result = Clasp.resolve(
-    size * size, # Number of variables
+    variable_count, # Number of variables
     rules,
     max_solutions=0
 )
 
 for i in range(0, len(solutions)):
     print('Test solution {}'.format(i + 1))
-    print(Table.from_values(solutions[i]))
+    print(Table.from_values(solutions[i][0: size * size]))
     print('')
