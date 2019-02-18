@@ -239,15 +239,6 @@ def rule_2(size, index):
     rows.extend(cols)
     return rows
 
-def equal_row(table, fila1, fila2):
-    for i in range(0, table.size()):
-        cell1 = table.getCell(i, fila1)
-        cell2 = table.getCell(i, fila2)
-        if cell1 != '.' and cell2 != '.':
-            if cell1 != cell2:
-                return False
-    return True
-
 def equals(table, col1, col2):
     for i in range(0, table.size()):
         cell1 = table.getCell(col1, i)
@@ -257,36 +248,6 @@ def equals(table, col1, col2):
                 return False
     return True           
 
-def proposicional_logic_row(size, count, fila1, fila2):
-    sum1 = size * fila1 + 1
-    sum2 = size * fila2 + 1
-    clauses = []
-    aux = []
-    for i in range(1, size+1):
-        count += 1
-        clauses.append([-count, i + sum1, i + sum2])
-        clauses.append([-count, -(i + sum1), -(i + sum2)])
-        clauses.append([count, -(i + sum1), i + sum2])
-        clauses.append([count, i + sum1, -(i + sum2)])
-        aux.extend([count])
-    clauses.append(aux)
-    return clauses
-
-def proposicional_logic_column(size, count, fila1, fila2):
-    sum1 = fila1 + 1
-    sum2 = fila2 + 1
-    clauses = []
-    aux = []
-    for i in range(0, size):
-        count += 1
-        clauses.append([-count, i * size + sum1, i * size + sum2])
-        clauses.append([-count, -(i * size + sum1), -(i * size + sum2)])
-        clauses.append([count, -(i * size + sum1), i * size + sum2])
-        clauses.append([count, i * size + sum1, -(i * size + sum2)])
-        aux.extend([count])
-    clauses.append(aux)
-    return clauses
-
 def propositional_logic(atm, num1, num2):
     clauses = []
     clauses.append([-atm, num1, num2])
@@ -294,7 +255,6 @@ def propositional_logic(atm, num1, num2):
     clauses.append([atm, -num1, num2])
     clauses.append([atm, num1, -num2])
     return clauses
-
 
 def rule_3(table):
     size = table.size()
@@ -358,20 +318,7 @@ def rule_3_without(table):
                 count += 1
                 clauses.extend(propositional_logic(count, j * size + k + 1, j * size + i + 1))
     return count, clauses
-"""
-def rule_3(table):
-    size = table.size()
-    count = size * size + 1
-    clauses = []
-    for k in range(0, size - 1):
-        for i in range(k + 1, size):
-            if equal_row(table, k, i):
-                clauses.extend(proposicional_logic_row(size, count, k, i))
-                count += size
-            if equal_column(table, k, i):
-                clauses.extend(proposicional_logic_column(size, count, k, i))
-                count += size
-    return clauses"""
+    
 #
 # Main
 #
