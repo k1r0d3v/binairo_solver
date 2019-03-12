@@ -46,6 +46,18 @@ class Table:
             col.append(self.getCell(x, i))
         return col
 
+    def toAsp(self):
+        str = ''
+        for i in range(0, self.__size):
+            for j in range(0, self.__size):
+                if self.__data[i * self.__size + j] == '.':
+                    continue
+                value = 'white'
+                if self.__data[i * self.__size + j] == '1':
+                    value = 'black'
+                str += 'table({}, {}, {}).'.format( i + 1, j + 1, value)
+        return str
+
     def __str__(self):
         str = ''
         for i in range(0, self.__size * self.__size):
@@ -171,7 +183,7 @@ def rule_table(t):
             row.append([i + 1])
     return row
 
-"""
+
 # Converts a list of lists to a format that understand wolfram
 def to_wolfram(l, alphabet = 'ABCDEFGHIKLMNOPQRSTVXYZ', sand = ' && ', sor = ' || ', snot = '~'):    
     r = ''
@@ -199,7 +211,7 @@ def test_rule_1():
 
         return False
 
-    test = [0, 0, 1, 1, 1, 1]
+    test = [0, 1, 1, 1]
     all = list(set(itertools.permutations(test)))
     valids = []
     for i in all:        
@@ -209,7 +221,10 @@ def test_rule_1():
     print('TEST ALL DNF:' + to_wolfram(all))    
     print('TEST VALIDS DNF:' + to_wolfram(valids))
     return []
-"""
+
+
+test_rule_1()
+
 
 
 def rule_1_base(rows, row, cnt, size):    
@@ -219,7 +234,6 @@ def rule_1_base(rows, row, cnt, size):
             return        
         if row[-1] > 0 and row[-2] > 0 and row[-3] > 0:
             return
-    
     
     if len(row) == size and cnt != 0:
         return
@@ -309,11 +323,8 @@ def rule_2(size):
     rows.extend(cols)
     return rows
 
-def equals(table, col1, col2):
-    for i in range(0, table.size()):
-        cell1 = table.getCell(col1, i)
-        cell2 = table.getCell(col2, i)
-        if cell1 != '.' and cell2 != '.':
+def equals(table, cell1, cell2):
+    if cell1 != '.' and cell2 != '.':
             if cell1 != cell2:
                 return False
     return True           
@@ -349,7 +360,7 @@ def rule_3(table):
                     else:
                         countRow += 1
                         count += 1
-                        rows.extend(propositional_logic(count, j + size * k + 1, j + size * i + 1))
+                        rows.extend(propositional_logic(countRow, j + size * k + 1, j + size * i + 1))
 
                 if not distintCol: 
                     if not equals(table, table.getCell(k, j), table.getCell(i, j)):
@@ -361,17 +372,19 @@ def rule_3(table):
                     else:      
                         countCol += 1
                         count += 1                  
-                        cols.extend(propositional_logic(count, j * size + k + 1, j * size + i + 1))
+                        cols.extend(propositional_logic(countCol, j * size + k + 1, j * size + i + 1))
                 #Poner false sumar contadores añadir clausulas
             clauses.extend(rows)
             clauses.extend(cols)
             if distintRow:
                 distintRow = False
             else:
+                clauses.append(list(range(countRow-size + 1, countRow + 1)))
                 countRow += size
             if distintCol:
                 distintCol = False
             else:
+                clauses.append(list(range(countCol-size + 1, countCol + 1)))
                 countCol += size
 
     return count, clauses
@@ -387,49 +400,69 @@ def rule_3_without(table):
                 clauses.extend(propositional_logic(count, j + size * k + 1, j + size * i + 1))
                 count += 1
                 clauses.extend(propositional_logic(count, j * size + k + 1, j * size + i + 1))
+            clauses.append(list(range(count-size * 2 + 1, count, 2)))
+            clauses.append(list(range(count-size * 2 + 2, count, 2)))
+               
     return count, clauses
 
-#
-# Main
-#
-#t = Table.from_file('samples/1_6x6.txt')
-#t = Table.from_file('samples/1_6x6.txt')
-#t = Table.from_file('samples/2_8x8.txt')
-t = Table.from_file('samples/3_8x8.txt')
-#t = Table.from_file('samples/4_10x10.txt')
-#t = Table.from_file('samples/5_10x10.txt')
-#t = Table.from_file('samples/6_14x14.txt')
-#t = Table.from_file('samples/7_14x14.txt')
-#t = Table.from_file('samples/8_20x20.txt')
-#t = Table.from_file('samples/9_20x20.txt')
-#t = Table.from_file('samples/10_24x24.txt')
-#t = Table.from_file('samples/11_30x30.txt')
-#t = Table.from_file('samples/12_34x34.txt')
+def equals_row(n, a, b):
+    for i in range(0, n):
+        if a[i] != b[i]:
+            return False
+    return True
+
+def test_rule_3(n, t):
+    for i in range(0, t.size()):
+        for j in range(0, t.size()):
+            if i != j and equals_row(n, t.getRow(i), t.getRow(j)):
+                raise Exception('Test rule 3 fail: {} {}'.format(i, j))
+            if i != j and equals_row(n, t.getColumn(i), t.getColumn(j)):
+                raise Exception('Test rule 3 fail: {} {}'.format(i, j))
+
+if __name__ == "__main__":
+    #
+    # Main
+    #
+    #t = Table.from_file('samples/1_6x6.txt')
+    #t = Table.from_file('samples/1_6x6.txt')
+    t = Table.from_file('samples/2_8x8.txt')
+    #t = Table.from_file('samples/3_8x8.txt')
+    #t = Table.from_file('samples/4_10x10.txt')
+    #t = Table.from_file('samples/5_10x10.txt')
+    #t = Table.from_file('samples/6_14x14.txt')
+    #t = Table.from_file('samples/7_14x14.txt')
+    #t = Table.from_file('samples/8_20x20.txt')
+    #t = Table.from_file('samples/9_20x20.txt')
+    #t = Table.from_file('samples/10_24x24.txt')
+    #t = Table.from_file('samples/11_30x30.txt')
+    #t = Table.from_file('samples/12_34x34.txt')
 
 
-print('{}\n'.format(t))
+    print('{}\n'.format(t))
 
-size = t.size()
-rules = []
+    size = t.size()
+    rules = []
 
-# Initial state rule
-rules.extend(rule_table(t))
+    # Initial state rule
+    rules.extend(rule_table(t))
 
-# The three conditions rules
-rules.extend(rule_1(size))
-rules.extend(rule_2(size))
-variable_count, clauses = rule_3_without(t)
-rules.extend(clauses)
+    # The three conditions rules
+    rules.extend(rule_1(size))
+    rules.extend(rule_2(size))
+    variable_count, clauses = rule_3(t)
+    #variable_count, clauses = rule_3_without(t)
+    rules.extend(clauses)
 
-solutions, result = Clasp.resolve(
-    variable_count, # Number of variables
-    rules,
-    max_solutions=10
-)
+    solutions, result = Clasp.resolve(
+        variable_count, # Number of variables
+        rules,
+        max_solutions=100
+    )
 
-for i in range(0, len(solutions)):
-    print('Test solution {}'.format(i + 1))
-    t = Table.from_values(solutions[i][0: size * size])
-    for j in range(0, size):
-        row = t.getRow(j)
-        print('{} - zeros: {}'.format(row, len(list(filter(lambda x: x == '0', row)))))
+    for i in range(0, len(solutions)):
+        print('Test solution {}'.format(i + 1))
+        t = Table.from_values(solutions[i][0: size * size])
+        test_rule_3(size, t)
+        for j in range(0, size):
+            row = t.getRow(j)
+            print('{} - zeros: {}'.format(row, len(list(filter(lambda x: x == '0', row)))))
