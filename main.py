@@ -3,7 +3,6 @@
 import subprocess
 import sys
 import math
-import itertools
 
 if (sys.version_info.major * 10 + sys.version_info.minor) < 35:
         raise Exception("Python 3.5 or a more recent version is required.")
@@ -212,14 +211,12 @@ def test_rule_1():
 """
 
 
-def rule_1_base(rows, row, cnt, size):    
-    
+def rule_1_base(rows, row, cnt, size):
     if len(row) > 2:
         if row[-1] < 0 and row[-2] < 0 and row[-3] < 0:
             return        
         if row[-1] > 0 and row[-2] > 0 and row[-3] > 0:
             return
-    
     
     if len(row) == size and cnt != 0:
         return
@@ -228,7 +225,7 @@ def rule_1_base(rows, row, cnt, size):
         rows.append(row)
         return
 
-    if cnt != 0:
+    if cnt != 0:               
         rule_1_base(rows, row + [1], cnt - 1, size)
 
     row.append(-1)
@@ -267,7 +264,6 @@ def rule_1(size):
                 col[j] *= -1
             rows.append(row)
             rows.append(col)
-            
 
     return rows
 
@@ -320,8 +316,8 @@ def rule_2(size):
 #t = Table.from_file('samples/5_10x10.txt')
 #t = Table.from_file('samples/6_14x14.txt')
 #t = Table.from_file('samples/7_14x14.txt')
-#t = Table.from_file('samples/8_20x20.txt')
-t = Table.from_file('samples/9_20x20.txt')
+t = Table.from_file('samples/8_20x20.txt')
+#t = Table.from_file('samples/9_20x20.txt')
 #t = Table.from_file('samples/10_24x24.txt')
 #t = Table.from_file('samples/11_30x30.txt')
 #t = Table.from_file('samples/12_34x34.txt')
@@ -338,9 +334,8 @@ rules.extend(rule_table(t))
 # The three conditions rules
 rules.extend(rule_1(size))
 rules.extend(rule_2(size))
-"""
-rules.extend(rule_3(t))
-"""
+#rules.extend(rule_3(t))
+
 
 solutions, result = Clasp.resolve(
     size * size, # Number of variables
@@ -351,7 +346,11 @@ solutions, result = Clasp.resolve(
 for i in range(0, len(solutions)):
     print('Test solution {}'.format(i + 1))
     t = Table.from_values(solutions[i])
+    zeros = [0] * size
     for j in range(0, size):
         row = t.getRow(j)
+        zeros[j] = len(list(filter(lambda x: x == '0', t.getColumn(j))))
         print('{} - zeros: {}'.format(row, len(list(filter(lambda x: x == '0', row)))))
+    
+    print('Column zeros: {}'.format(zeros))
     print('')
