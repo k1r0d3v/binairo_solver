@@ -420,6 +420,7 @@ def test_rule_3(n, t):
                 raise Exception('Test rule 3 fail: {} {}'.format(i, j))
 
 if __name__ == "__main__":
+
     #
     # Main
     #
