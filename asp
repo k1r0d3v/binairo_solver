@@ -25,7 +25,7 @@ class Table:
                 value = 'white'
                 if self.__data[i * self.__size + j] == '1':
                     value = 'black'
-                str += 'table({}, {}, {}).\n'.format( i + 1, j + 1, value)
+                str += 'hint({}, {}, {}).\n'.format( i + 1, j + 1, value)
         return str
 
     @staticmethod
