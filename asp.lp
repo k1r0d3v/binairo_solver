@@ -22,6 +22,6 @@ table(7, 4, white).
 table(7, 5, white).
 table(8, 1, white).
 
-size * size { foo(X, Y, Z) : values(X), values(Y), colors(Z) } size * size.
+size * size { foo(X, Y, Z) : values(X), values(Y), colors(Z) }.
 %foo(X, Y, Z) :- foo(X, Y, Z), foo(A, B, C), A != X, B != Y.
 %:- foo(X, Y, Z), foo(X + 1, Y, Z), foo(X + 2, Y, Z).
