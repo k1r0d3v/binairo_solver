@@ -386,13 +386,15 @@ if __name__ == "__main__":
     #t = Table.from_file('samples/5_10x10.txt')
     #t = Table.from_file('samples/6_14x14.txt')
     #t = Table.from_file('samples/7_14x14.txt')
-    t = Table.from_file('samples/8_20x20.txt')
+    #t = Table.from_file('samples/8_20x20.txt')
     #t = Table.from_file('samples/9_20x20.txt')
     #t = Table.from_file('samples/10_24x24.txt')
     #t = Table.from_file('samples/11_30x30.txt')
     #t = Table.from_file('samples/12_34x34.txt')
-
-
+    t = Table.from_file('samples/comprobacion.txt')
+    test_rule_3(8, t)
+    print("Bien")
+    """
     print('{}\n'.format(t))
 
     size = t.size()
@@ -425,4 +427,4 @@ if __name__ == "__main__":
             row = t.getRow(j)
             print('{} - zeros: {}'.format(row, len(list(filter(lambda x: x == '0', row)))))
         
-        print('Column zeros: {}'.format(zeros))
+        print('Column zeros: {}'.format(zeros))"""
