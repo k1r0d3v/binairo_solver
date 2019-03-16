@@ -218,9 +218,12 @@ def equals_row(n, a, b):
     return True
 
 def pass_test(n, t):
-    test_rule_1(n,t)
-    test_rule_2(n,t)
-    test_rule_3(n,t)
+    if test_rule_1(n,t):
+        print('Not passed rule 1')
+    if test_rule_2(n,t):
+        print('Not passed rule 2')
+    if test_rule_3(n,t):
+        print('Not passed rule 3')
 
 
 def test_rule_1(n, t):
@@ -229,11 +232,14 @@ def test_rule_1(n, t):
         # Rows
         count = len(list(filter(lambda x: x == '0', t.get_row(i))))
         if count != nh:
-            raise Exception('Zero count at row {} is: {} != {}'.format(i + 1, count, nh))
+            #print('Zero count at row {} is: {} != {}'.format(i + 1, count, nh))
+            return True
 
         count = len(list(filter(lambda x: x == '0', t.get_col(i))))
         if count != nh:
-            raise Exception('Zero count at column {} is: {} != {}'.format(i + 1, count, nh))
+            #print('Zero count at column {} is: {} != {}'.format(i + 1, count, nh))
+            return True
+    return False
 
 def test_rule_2(n, t):
     for i in range(0, n):
@@ -242,37 +248,29 @@ def test_rule_2(n, t):
 
         for j in range(0, n - 2):                
             if (row[j] == '0' and row[j + 1] == '0' and row[j + 2] == '0') or (row[j] == '1' and row[j + 1] == '1' and row[j + 2] == '1'):
-                raise Exception('Consecutive colors at row {}, index: {}'.format(i + 1, j))
-                
+                #print('Consecutive colors at row {}, index: {}'.format(i + 1, j))
+                return True
             if (col[j] == '0' and col[j + 1] == '0' and col[j + 2] == '0') or (col[j] == '1' and col[j + 1] == '1' and col[j + 2] == '1'):
-                raise Exception('Consecutive colors at column {}, index: {}'.format(i + 1, j))
+                #print('Consecutive colors at column {}, index: {}'.format(i + 1, j))
+                return True
+    return False
 
 def test_rule_3(n, t):
     for i in range(0, t.size()):
         for j in range(0, t.size()):
             if i != j and equals_row(n, t.get_row(i), t.get_row(j)):
-                raise Exception('Test rule 3 fail: {} {}'.format(i, j))
+                #print('Test rule 3 fail: {} {}'.format(i, j))
+                return True
             if i != j and equals_row(n, t.get_col(i), t.get_col(j)):
-                raise Exception('Test rule 3 fail: {} {}'.format(i, j))
+                #print('Test rule 3 fail: {} {}'.format(i, j))
+                return True
+    return False
 
 if __name__ == "__main__":
 
     #
     # Main
     #
-    #t = Table.from_file('samples/1_6x6.txt', Table.from_text)
-    #t = Table.from_file('samples/1_6x6.txt', Table.from_text)
-    #t = Table.from_file('samples/2_8x8.txt', Table.from_text)
-    #t = Table.from_file('samples/3_8x8.txt', Table.from_text)
-    #t = Table.from_file('samples/4_10x10.txt', Table.from_text)
-    #t = Table.from_file('samples/5_10x10.txt', Table.from_text)
-    #t = Table.from_file('samples/6_14x14.txt', Table.from_text)
-    #t = Table.from_file('samples/7_14x14.txt', Table.from_text)
-    #t = Table.from_file('samples/8_20x20.txt', Table.from_text)
-    #t = Table.from_file('samples/9_20x20.txt', Table.from_text)
-    #t = Table.from_file('samples/10_24x24.txt', Table.from_text)
-    #t = Table.from_file('samples/11_30x30.txt', Table.from_text)
-    #t = Table.from_file('samples/12_34x34.txt', Table.from_text)
 
     if len(sys.argv) != 2 :
         print("The program needs one input file.")
@@ -297,18 +295,12 @@ if __name__ == "__main__":
     solutions, result = Clasp.resolve(
         variable_count, # Number of variables
         rules,
-        max_solutions=10
+        max_solutions=0
     )
 
     for i in range(0, len(solutions)):
-        print('Test solution {}'.format(i + 1))
+        print('Test solution {}\n'.format(i + 1))
         t = Table.from_values(solutions[i][0: size * size])
+        print('{}\n'.format(t))
         pass_test(size, t)
-        zeros = [0] * size
-        for j in range(0, size):
-            zeros[j] = len(list(filter(lambda x: x == '0', t.get_col(j))))
-
-            row = t.get_row(j)
-            print('{} - zeros: {}'.format(row, len(list(filter(lambda x: x == '0', row)))))
         
-        print('Column zeros: {}'.format(zeros))
