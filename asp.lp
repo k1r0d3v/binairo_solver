@@ -1,5 +1,4 @@
 #show x/3.
-%#show distint/2.
 values(white;black).
 rows(1..size).
 cols(1..size).
@@ -236,8 +235,8 @@ x(Row, Col, Val) :- hint(Row, Col, Val).
 :- x(Row, Col1, Val), x(Row, Col2, Val), x(Row, Col3, Val), Col2 == Col1 + 1, Col3 == Col2 + 1.
 
 % Rule 3
-% No puede haber una fila que no sea distinta a todas las demas
-% No puede haber una columna que no sea distinta a todas las demas
+% No puede haber una fila que no sea distinta a todas las demas, se deben diferenciar en al menos una columna
+% No puede haber una columna que no sea distinta a todas las demas, se deben diferenciar en al menos una fila
 distint_row(Row1, Row2, Col) :- x(Row1, Col, Val1), x(Row2, Col, Val2), Row1 != Row2, Val1 != Val2.
 distint_col(Col1, Col2, Row) :- x(Row, Col1, Val1), x(Row, Col2, Val2), Col1 != Col2, Val1 != Val2.
 

@@ -3,106 +3,10 @@
 import subprocess
 import sys
 import math
+from table import *
 
 if (sys.version_info.major * 10 + sys.version_info.minor) < 35:
         raise Exception("Python 3.5 or a more recent version is required.")
-
-class Table:
-    def __init__(self):
-        self.__size = 0
-        self.__date = None
-
-    def size(self):
-        return self.__size
-
-    def data(self):
-        return self.__data
-    
-    def getCell(self, x, y):
-        assert x < self.__size and y < self.__size, 'Index overflow'
-        return self.__data[y * self.__size + x]
-
-    def setCell(self, x, y, value):
-        assert x < self.__size and y < self.__size, 'Index overflow'
-        assert len(value) == 1, 'Expected char value'
-        assert value == '.' or value == '0' or value == '1', 'Invalid value, accepted values are: ".", "0", "1"'
-
-        index = y * self.__size + x
-        old = self.__data[index]
-        self.__data[index] = value
-        return old
-
-    def getRow(self, y):
-        assert y < self.__size, 'Index overflow'
-        row = y * self.__size
-        return self.__data[row:row + self.__size]
-
-    def getColumn(self, x):
-        assert x < self.__size, 'Index overflow'
-
-        col = []
-        for i in range(0, self.__size):
-            col.append(self.getCell(x, i))
-        return col
-
-    def toAsp(self):
-        str = ''
-        for i in range(0, self.__size):
-            for j in range(0, self.__size):
-                if self.__data[i * self.__size + j] == '.':
-                    continue
-                value = 'white'
-                if self.__data[i * self.__size + j] == '1':
-                    value = 'black'
-                str += 'table({}, {}, {}).'.format( i + 1, j + 1, value)
-        return str
-
-    def __str__(self):
-        str = ''
-        for i in range(0, self.__size * self.__size):
-            if (i != 0 and i % self.__size == 0):
-                str += '\n'
-            str += self.__data[i]
-        return str
-    
-    # Note: 
-    # Negative values are white and
-    # positive values are black
-    #
-    # white = 0 with values < 0
-    # black = 1 with values > 0
-    @staticmethod
-    def from_values(values):
-        t = Table()
-        t.__size = int(math.sqrt(len(values))) # len(values) = size * size
-        t.__data = list('.' * len(values)) # Fill data with empty chars
-        
-        for i in values:
-            if (abs(i) - 1) > len(t.__data):
-                raise Exception('index out of range: {} in [{}, {})'.format(abs(i), 0, len(t.__data)))
-            t.__data[abs(i) - 1] = '0' if i < 0 else '1'
-
-        return t
-
-    @staticmethod
-    def from_text(size, text):
-        t = Table()
-        t.__size = size
-        t.__data = []
-
-        lines = text.split('\n')
-        for line in lines:
-            for column in line:
-                t.__data.append(column)
-        return t
-
-    @staticmethod
-    def from_file(filename):
-        
-        with open(filename, 'r') as file:
-            size = int(file.readline())
-            return Table.from_text(size, file.read())
-        raise Exception()
 
 
 class Clasp:
@@ -305,7 +209,7 @@ def rule_3(table):
         for i in range(k + 1, size):
             for j in range(0, size):
                 if not distintRow:
-                    if not equals(table, table.getCell(j, k), table.getCell(j, i)):
+                    if not equals(table, table.get_cell(j, k), table.get_cell(j, i)):
                         #Borrar cosas demas y restar contador
                         distintRow = True
                         countRow -= j                        
@@ -317,7 +221,7 @@ def rule_3(table):
                         rows.extend(propositional_logic(countRow, j + size * k + 1, j + size * i + 1))
 
                 if not distintCol: 
-                    if not equals(table, table.getCell(k, j), table.getCell(i, j)):
+                    if not equals(table, table.get_cell(k, j), table.get_cell(i, j)):
                         #Borrar cosas demas y restar contador
                         distintCol = True   
                         countCol -= j
@@ -368,9 +272,9 @@ def equals_row(n, a, b):
 def test_rule_3(n, t):
     for i in range(0, t.size()):
         for j in range(0, t.size()):
-            if i != j and equals_row(n, t.getRow(i), t.getRow(j)):
+            if i != j and equals_row(n, t.get_row(i), t.get_row(j)):
                 raise Exception('Test rule 3 fail: {} {}'.format(i, j))
-            if i != j and equals_row(n, t.getColumn(i), t.getColumn(j)):
+            if i != j and equals_row(n, t.get_col(i), t.get_col(j)):
                 raise Exception('Test rule 3 fail: {} {}'.format(i, j))
 
 if __name__ == "__main__":
@@ -378,19 +282,19 @@ if __name__ == "__main__":
     #
     # Main
     #
-    #t = Table.from_file('samples/1_6x6.txt')
-    #t = Table.from_file('samples/1_6x6.txt')
-    #t = Table.from_file('samples/2_8x8.txt')
-    #t = Table.from_file('samples/3_8x8.txt')
-    #t = Table.from_file('samples/4_10x10.txt')
-    #t = Table.from_file('samples/5_10x10.txt')
-    #t = Table.from_file('samples/6_14x14.txt')
-    #t = Table.from_file('samples/7_14x14.txt')
-    t = Table.from_file('samples/8_20x20.txt')
-    #t = Table.from_file('samples/9_20x20.txt')
-    #t = Table.from_file('samples/10_24x24.txt')
-    #t = Table.from_file('samples/11_30x30.txt')
-    #t = Table.from_file('samples/12_34x34.txt')
+    #t = Table.from_file('samples/1_6x6.txt', Table.from_text)
+    #t = Table.from_file('samples/1_6x6.txt', Table.from_text)
+    #t = Table.from_file('samples/2_8x8.txt', Table.from_text)
+    #t = Table.from_file('samples/3_8x8.txt', Table.from_text)
+    #t = Table.from_file('samples/4_10x10.txt', Table.from_text)
+    t = Table.from_file('samples/5_10x10.txt', Table.from_text)
+    #t = Table.from_file('samples/6_14x14.txt', Table.from_text)
+    #t = Table.from_file('samples/7_14x14.txt', Table.from_text)
+    #t = Table.from_file('samples/8_20x20.txt', Table.from_text)
+    #t = Table.from_file('samples/9_20x20.txt', Table.from_text)
+    #t = Table.from_file('samples/10_24x24.txt', Table.from_text)
+    #t = Table.from_file('samples/11_30x30.txt', Table.from_text)
+    #t = Table.from_file('samples/12_34x34.txt', Table.from_text)
 
 
     print('{}\n'.format(t))
@@ -420,9 +324,9 @@ if __name__ == "__main__":
         test_rule_3(size, t)
         zeros = [0] * size
         for j in range(0, size):
-            zeros[j] = len(list(filter(lambda x: x == '0', t.getColumn(j))))
+            zeros[j] = len(list(filter(lambda x: x == '0', t.get_col(j))))
 
-            row = t.getRow(j)
+            row = t.get_row(j)
             print('{} - zeros: {}'.format(row, len(list(filter(lambda x: x == '0', row)))))
         
         print('Column zeros: {}'.format(zeros))
