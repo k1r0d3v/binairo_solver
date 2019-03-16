@@ -257,23 +257,6 @@ def test_rule_3(n, t):
 
 if __name__ == "__main__":
 
-    #
-    # Main
-    #
-    #t = Table.from_file('samples/1_6x6.txt', Table.from_text)
-    #t = Table.from_file('samples/1_6x6.txt', Table.from_text)
-    #t = Table.from_file('samples/2_8x8.txt', Table.from_text)
-    #t = Table.from_file('samples/3_8x8.txt', Table.from_text)
-    #t = Table.from_file('samples/4_10x10.txt', Table.from_text)
-    #t = Table.from_file('samples/5_10x10.txt', Table.from_text)
-    #t = Table.from_file('samples/6_14x14.txt', Table.from_text)
-    #t = Table.from_file('samples/7_14x14.txt', Table.from_text)
-    #t = Table.from_file('samples/8_20x20.txt', Table.from_text)
-    #t = Table.from_file('samples/9_20x20.txt', Table.from_text)
-    #t = Table.from_file('samples/10_24x24.txt', Table.from_text)
-    #t = Table.from_file('samples/11_30x30.txt', Table.from_text)
-    #t = Table.from_file('samples/12_34x34.txt', Table.from_text)
-
     if len(sys.argv) != 2 :
         print("The program needs one input file.")
         exit(-1)

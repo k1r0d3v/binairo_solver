@@ -84,56 +84,59 @@ def pass_rule_3(n, t):
 
 
 def print_usage():
-    print('USAGE: asp_helper (--table_to_asp <filename>) | (--table_from_asp <size> <text>) | (--execute_asp <size> <max_solutions> <filename>)')
+    print('Usage: asp_helper (--table_to_asp <filename>) | (--table_from_asp <size> <text>) | (--execute_asp <size> <max_solutions> <filename> [<filename>...])')
 
-if len(sys.argv) < 2:
-    print_usage()
-    exit(-1)
-
-if sys.argv[1] == '--table_to_asp':
-    if len(sys.argv) != 3:
+if __name__ == "__main__":
+    if len(sys.argv) < 2:
         print_usage()
         exit(-1)
 
-    t = Table.from_file(sys.argv[2], Table.from_text)
-    print(t.to_asp())
-elif sys.argv[1] == '--table_from_asp':
-    if len(sys.argv) != 4:
+    if sys.argv[1] == '--table_to_asp':
+        if len(sys.argv) != 3:
+            print_usage()
+            exit(-1)
+
+        t = Table.from_file(sys.argv[2], Table.from_text)
+        print(t.to_asp())
+    elif sys.argv[1] == '--table_from_asp':
+        if len(sys.argv) != 4:
+            print_usage()
+            exit(-1)
+
+        print(Table.from_asp(int(sys.argv[2]), sys.argv[3]))
+    elif sys.argv[1] == '--execute_asp':
+        if len(sys.argv) < 5:
+            print_usage()
+            exit(-1)
+
+        max_solutions = int(sys.argv[3])
+        size = int(sys.argv[2])
+        text = ''
+        with open(sys.argv[4]) as file:
+            text = file.read()
+
+        params = 
+
+        solutions, result = Clingo.resolve(text, ['-c size={}'.format(size)], max_solutions)
+        if len(solutions) != 0:
+            errors = [0, 0, 0]
+            for i in solutions:
+                t = Table.from_asp(size, i)
+                print(t)
+
+                if not pass_rule_1(size, t):
+                    errors[0] += 1
+
+                if not pass_rule_2(size, t):
+                    errors[1] += 1
+
+                if not pass_rule_3(size, t):
+                    errors[2] += 1
+                
+                print()
+
+        print('Result: {}'.format(result))
+        for i, j in enumerate(errors):
+            print('Not passed rule {}: {}'.format(i + 1, j))
+    else:
         print_usage()
-        exit(-1)
-
-    print(Table.from_asp(int(sys.argv[2]), sys.argv[3]))
-elif sys.argv[1] == '--execute_asp':
-    if len(sys.argv) != 5:
-        print_usage()
-        exit(-1)
-
-    max_solutions = int(sys.argv[3])
-    size = int(sys.argv[2])
-    text = ''
-    with open(sys.argv[4]) as file:
-        text = file.read()
-
-    solutions, result = Clingo.resolve(text, ['-c size={}'.format(size)], max_solutions)
-    if len(solutions) != 0:
-        errors = [0, 0, 0]
-        for i in solutions:
-            t = Table.from_asp(size, i)
-            print(t)
-
-            if not pass_rule_1(size, t):
-                errors[0] += 1
-
-            if not pass_rule_2(size, t):
-                errors[1] += 1
-
-            if not pass_rule_3(size, t):
-                errors[2] += 1
-            
-            print()
-
-    print('Result: {}'.format(result))
-    for i, j in enumerate(errors):
-        print('Not passed rule {}: {}'.format(i + 1, j))
-else:
-    print_usage()

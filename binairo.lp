@@ -19,14 +19,14 @@ x(Row, Col, Val) :- hint(Row, Col, Val).
 
 % Rule 1
 % Ejemplo: Genera x(Row, 1, black) o x(Row, 2, black) o x(Row, 3, black) o x(Row, 4, black) y forzamos a que elija 2
-%{ x(Row, Col, black) : cols(Col) } = size / 2 :- rows(Row).
-%{ x(Row, Col, black) : rows(Row) } = size / 2 :- cols(Col).
+{ x(Row, Col, black) : cols(Col) } = size / 2 :- rows(Row).
+{ x(Row, Col, black) : rows(Row) } = size / 2 :- cols(Col).
 
 % Rule 2
 % No puede haber tres filas seguidas del mismo color
 % No puede haber tres columnas seguidas del mismo color
-%:- x(Row1, Col, Val), x(Row2, Col, Val), x(Row3, Col, Val), Row2 == Row1 + 1, Row3 == Row2 + 1.
-%:- x(Row, Col1, Val), x(Row, Col2, Val), x(Row, Col3, Val), Col2 == Col1 + 1, Col3 == Col2 + 1.
+:- x(Row1, Col, Val), x(Row2, Col, Val), x(Row3, Col, Val), Row2 == Row1 + 1, Row3 == Row2 + 1.
+:- x(Row, Col1, Val), x(Row, Col2, Val), x(Row, Col3, Val), Col2 == Col1 + 1, Col3 == Col2 + 1.
 
 % Rule 3
 % No puede haber una fila que no sea distinta a todas las demas, se deben diferenciar en al menos una columna
