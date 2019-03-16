@@ -11,6 +11,7 @@
 # where table is a text document with the expected format <size>\n<values>
 
 ./binairo samples/3_8x8.txt
+Size: 8
 ....0...
 .1....1.
 1.1..11.
@@ -20,7 +21,20 @@
 ...1....
 0..1....
 
-TODO: Poner solucion aqui!!!!!!!!!!!!
+Solution: 1
+11010100
+01001011
+10100110
+01011001
+10101100
+01100110
+10011001
+00110011
+
+Result: SATISFIABLE
+Not passed rule 1: 0
+Not passed rule 2: 0
+Not passed rule 3: 0
 ```
 	
 ## ASP

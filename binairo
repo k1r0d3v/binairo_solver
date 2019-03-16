@@ -217,31 +217,24 @@ def equals_row(n, a, b):
             return False
     return True
 
-def pass_test(n, t):
-    if test_rule_1(n,t):
-        print('Not passed rule 1')
-    if test_rule_2(n,t):
-        print('Not passed rule 2')
-    if test_rule_3(n,t):
-        print('Not passed rule 3')
-
-
-def test_rule_1(n, t):
+def pass_rule_1(n, t):
     nh = n // 2
+    passed = True
     for i in range(0, n):
         # Rows
         count = len(list(filter(lambda x: x == '0', t.get_row(i))))
         if count != nh:
             #print('Zero count at row {} is: {} != {}'.format(i + 1, count, nh))
-            return True
+            passed = False
 
         count = len(list(filter(lambda x: x == '0', t.get_col(i))))
         if count != nh:
             #print('Zero count at column {} is: {} != {}'.format(i + 1, count, nh))
-            return True
-    return False
+            passed = False
+    return passed
 
-def test_rule_2(n, t):
+def pass_rule_2(n, t):
+    passed = True
     for i in range(0, n):
         row = t.get_row(i)
         col = t.get_col(i)
@@ -249,22 +242,32 @@ def test_rule_2(n, t):
         for j in range(0, n - 2):                
             if (row[j] == '0' and row[j + 1] == '0' and row[j + 2] == '0') or (row[j] == '1' and row[j + 1] == '1' and row[j + 2] == '1'):
                 #print('Consecutive colors at row {}, index: {}'.format(i + 1, j))
-                return True
+                passed = False
+
             if (col[j] == '0' and col[j + 1] == '0' and col[j + 2] == '0') or (col[j] == '1' and col[j + 1] == '1' and col[j + 2] == '1'):
                 #print('Consecutive colors at column {}, index: {}'.format(i + 1, j))
-                return True
-    return False
+                passed = False
 
-def test_rule_3(n, t):
+    return passed
+
+def pass_rule_3(n, t):
+    def equals(n, a, b):
+        for i in range(0, n):
+            if a[i] != b[i]:
+                return False
+        return True
+
+    passed = True
     for i in range(0, t.size()):
         for j in range(0, t.size()):
-            if i != j and equals_row(n, t.get_row(i), t.get_row(j)):
-                #print('Test rule 3 fail: {} {}'.format(i, j))
-                return True
-            if i != j and equals_row(n, t.get_col(i), t.get_col(j)):
-                #print('Test rule 3 fail: {} {}'.format(i, j))
-                return True
-    return False
+            if i != j and equals(n, t.get_row(i), t.get_row(j)):
+                #print('Rule3 test failed at rows: {}, {}'.format(i + 1, j + 1))
+                passed = False
+            if i != j and equals(n, t.get_col(i), t.get_col(j)):
+                #print('Rule3 test failed at columns: {}, {}'.format(i + 1, j + 1))
+                passed = False
+    return passed
+
 
 if __name__ == "__main__":
     if len(sys.argv) != 2 :
@@ -273,7 +276,9 @@ if __name__ == "__main__":
 
     t = Table.from_file(sys.argv[1], Table.from_text)
 
-    print('{}\n'.format(t))
+    print('Size: {}'.format(t.size()))
+    print('{}'.format(t))
+    print('')
 
     size = t.size()
     rules = []
@@ -293,9 +298,23 @@ if __name__ == "__main__":
         max_solutions=0
     )
 
+    errors = [0, 0, 0]
     for i in range(0, len(solutions)):
-        print('Test solution {}\n'.format(i + 1))
+        print('Solution: {}'.format(i + 1))
         t = Table.from_values(solutions[i][0: size * size])
-        print('{}\n'.format(t))
-        pass_test(size, t)
+        print('{}'.format(t))
+
+        if not pass_rule_1(size, t):
+            errors[0] += 1
+
+        if not pass_rule_2(size, t):
+            errors[1] += 1
+
+        if not pass_rule_3(size, t):
+            errors[2] += 1
         
+        print('')
+
+    print('Result: {}'.format(result))
+    for i, j in enumerate(errors):
+        print('Not passed rule {}: {}'.format(i + 1, j))
