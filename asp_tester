@@ -110,7 +110,7 @@ if __name__ == "__main__":
         max_solutions = int(sys.argv[2])
         size = None
         sizeConst = '#const size='
-        for i in sys.argv[3:]:
+        for i in (sys.argv[3:]):
             with open(i) as file:
                 text = file.read()                
                 sizeIndex = text.find(sizeConst)

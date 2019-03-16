@@ -98,8 +98,8 @@ class Table:
         t.__size = size
         t.__data = ['.'] * size * size
 
+        text=text.replace('\r', '')
         elements = text.split(' ')
-
         # ex. x(1, 2, black) -> x(
         entryStart = '{}('.format(name)
 
