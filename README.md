@@ -1,4 +1,4 @@
-#[Binairo puzzle](http://www.dc.fi.udc.es/~cabalar/kr/current/ex1.html) solver
+# [Binairo puzzle](http://www.dc.fi.udc.es/~cabalar/kr/current/ex1.html) solver
 
 ## Prerequisitos
 * Version de python >= 3.5
@@ -44,6 +44,10 @@ Se proporciona ademas un programa para convertir tablas a reglas asp
 y de igual manera de reglas asp a una tabla, y por último ofrece la posibilidad de ejecutar `clingo` con varios archivos de reglas y mostrar los resultados como tablas.
 
 #### Ejemplos de uso
+```
+$ asp_tester 
+Usage: asp_helper (--table_to_asp <filename>) | (--table_from_asp <size> <text>) | (--execute_asp <max_solutions> <filename> [<filename>...])
+```
 
 ##### Genera las reglas de pistas iniciales para ASP junto con la constante #const size de una tabla en formato texto
 ```
