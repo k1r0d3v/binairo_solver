@@ -42,6 +42,6 @@ for i in range(1, 13):
     board_html = board.get_attribute('innerHTML')
     
     size, text = format_board(board_html)
-    save_to_file('samples/{0}_{1}x{1}.txt'.format(i, size), text)
+    save_to_file('{0}_{1}x{1}.txt'.format(i, size), text)
 
 browser.quit()
