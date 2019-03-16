@@ -6,15 +6,13 @@ from table import *
 
 class Clingo:
     @staticmethod
-    def resolve(text, args=[], max_solutions=0):
+    def resolve(args=[], max_solutions=0):
 
         execLine = ['clingo', '--verbose=0', '{0}'.format(max_solutions)]
         execLine.extend(args)
 
-        # Execute clingo with text string as input
         cp = subprocess.run(            
-            execLine, 
-            input=text.encode('utf-8'),
+            execLine,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE
         )
@@ -24,7 +22,7 @@ class Clingo:
 
         # Raise a exception if stderr is not empty
         if len(stderr) != 0:
-            raise Exception('{}\n{}'.format(text, stderr))
+            raise Exception('{}'.format(stderr))
 
         # Parse the solutions        
         solutions = stdout.split('\n')
@@ -111,13 +109,11 @@ if __name__ == "__main__":
 
         max_solutions = int(sys.argv[3])
         size = int(sys.argv[2])
-        text = ''
-        with open(sys.argv[4]) as file:
-            text = file.read()
 
-        params = 
+        params = ['-c size={}'.format(size)]
+        params.extend(sys.argv[4:])
 
-        solutions, result = Clingo.resolve(text, ['-c size={}'.format(size)], max_solutions)
+        solutions, result = Clingo.resolve(params, max_solutions)
         if len(solutions) != 0:
             errors = [0, 0, 0]
             for i in solutions:

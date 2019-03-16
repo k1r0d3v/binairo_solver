@@ -3,15 +3,6 @@ values(white;black).
 rows(1..size).
 cols(1..size).
 
-hint(1, 1, black).
-hint(1, 3, black).
-hint(2, 2, black).
-hint(2, 3, white).
-hint(3, 3, white).
-hint(3, 4, white).
-hint(4, 1, white).
-hint(4, 3, black).
-
 % Genera x(X, Y, white) o x(X, Y, black) y forzamos a que elija uno
 { x(Row, Col, Val) : values(Val) } = 1 :- rows(Row), cols(Col).
 
