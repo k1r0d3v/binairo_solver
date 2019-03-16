@@ -82,7 +82,7 @@ def pass_rule_3(n, t):
 
 
 def print_usage():
-    print('Usage: asp_helper (--table_to_asp <filename>) | (--table_from_asp <size> <text>) | (--execute_asp <size> <max_solutions> <filename> [<filename>...])')
+    print('Usage: asp_helper (--table_to_asp <filename>) | (--table_from_asp <size> <text>) | (--execute_asp <max_solutions> <filename> [<filename>...])')
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
@@ -94,7 +94,7 @@ if __name__ == "__main__":
             print_usage()
             exit(-1)
 
-        t = Table.from_file(sys.argv[2], Table.from_text)
+        t = Table.from_file(sys.argv[2], Table.from_text)        
         print(t.to_asp())
     elif sys.argv[1] == '--table_from_asp':
         if len(sys.argv) != 4:
@@ -103,17 +103,24 @@ if __name__ == "__main__":
 
         print(Table.from_asp(int(sys.argv[2]), sys.argv[3]))
     elif sys.argv[1] == '--execute_asp':
-        if len(sys.argv) < 5:
+        if len(sys.argv) < 4:
             print_usage()
             exit(-1)
 
-        max_solutions = int(sys.argv[3])
-        size = int(sys.argv[2])
+        max_solutions = int(sys.argv[2])
+        size = None
+        sizeConst = '#const size='
+        for i in sys.argv[3:]:
+            with open(i) as file:
+                text = file.read()                
+                sizeIndex = text.find(sizeConst)
+                if sizeIndex != -1:
+                    sizeEnd = text.find('.', sizeIndex)
+                    if sizeEnd != -1:
+                        size = int(text[sizeIndex + len(sizeConst):sizeEnd])
+                        break
 
-        params = ['-c size={}'.format(size)]
-        params.extend(sys.argv[4:])
-
-        solutions, result = Clingo.resolve(params, max_solutions)
+        solutions, result = Clingo.resolve(sys.argv[3:], max_solutions)
         if len(solutions) != 0:
             errors = [0, 0, 0]
             for i in solutions:

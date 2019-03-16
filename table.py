@@ -39,7 +39,7 @@ class Table:
         return col
 
     def to_asp(self, name='hint', values=['white', 'black']):
-        str = ''
+        str = '#const size={}.\n'.format(self.__size)
         for i in range(0, self.__size):
             for j in range(0, self.__size):
                 if self.__data[i * self.__size + j] == '.':
@@ -99,9 +99,6 @@ class Table:
         t.__data = ['.'] * size * size
 
         elements = text.split(' ')
-        if len(elements) != size * size:
-            print('Expected {} entries, given {}'.format(size * size, len(elements)))
-            return None
 
         # ex. x(1, 2, black) -> x(
         entryStart = '{}('.format(name)
@@ -119,6 +116,9 @@ class Table:
             a, b, c = i.split(',')
 
             index = (int(a) - 1) * size + (int(b) - 1)
+            if index >= len(t.__data):
+                print('Warning: Skipping index out of range ({}, {}, {})'.format(a, b, c))
+                continue
             if t.__data[index] != '.':
                 print('Warning: Overridded value ({}, {}, {})'.format(a, b, c))
 
