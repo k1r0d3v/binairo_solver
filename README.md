@@ -7,10 +7,10 @@
 ## SAT
 #### Ejemplo de uso
 ```
-# Usage: binairo <table>
-# where table is a text document with the expected format <size>\n<values>
+$ binairo
+Usage: binairo <filename>
 
-./binairo samples/3_8x8.txt
+$ binairo samples/3_8x8.txt
 Size: 8
 ....0...
 .1....1.

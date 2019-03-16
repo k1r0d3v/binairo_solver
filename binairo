@@ -271,7 +271,7 @@ def pass_rule_3(n, t):
 
 if __name__ == "__main__":
     if len(sys.argv) != 2 :
-        print("The program needs one input file.")
+        print("Usage: binairo <filename>")
         exit(-1)
 
     t = Table.from_file(sys.argv[1], Table.from_text)
